@@ -65,7 +65,7 @@
                         <id>default-cli</id>
                         <configuration>
                             <mainClass>
-                                com.resources.integradorabiblioteca/com.resources.integradorabiblioteca.HelloApplication
+                                com.resources.integradorabiblioteca/com.resources.integradorabiblioteca.RunApplication
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
