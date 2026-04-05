@@ -1,14 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="CONTROLLER_NAME"
-            prefHeight="400.0" prefWidth="600.0">
-
-</AnchorPane>
+<VBox spacing="15" alignment="CENTER_LEFT" xmlns:fx="http://javafx.com/fxml" fx:controller="com.resources.integradorabiblioteca.controllers.DetailControllers" style="-fx-padding: 30; -fx-min-width: 300;">
+    <Label text="Ficha Técnica del Libro" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+    <GridPane hgap="15" vgap="10">
+        <Label text="ISBN/ID:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <Label fx:id="lblIsbn" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        <Label text="Título:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <Label fx:id="lblTitulo" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <Label text="Autor:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <Label fx:id="lblAutor" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        <Label text="Año:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <Label fx:id="lblAnio" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+        <Label text="Género:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <Label fx:id="lblGenero" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+        <Label text="Disponibilidad:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <Label fx:id="lblDisponible" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+    </GridPane>
+    <HBox alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+        <Button text="Cerrar Detalle" onAction="#onBackClick"/>
+    </HBox>
+</VBox>
