@@ -1,152 +1,70 @@
 # utez-2e-libreria-javafx-equipo03
-Integradora JavaFX — CRUD con Persistencia en Archivo
 
+## Integradora JavaFX — CRUD con Persistencia en Archivo
 
-Tecnología: Java + JavaFX (FXML + Controller)
+**Tecnología:** Java + JavaFX (FXML + Controllers)  
+**Modalidad:** Parejas  
+**Equipo:** Rene Alejandro Salgado Uresti y Victor Alexander Flores Villegas  
+**Grupo:** 2°E
 
-Modalidad: Parejas
+---
 
-Equipo: Rene Alejandro Salgado Uresti y Victor Alexander Flores Villegas
+## 1. Descripción del proyecto
+Este proyecto consiste en el desarrollo de una aplicación de escritorio basada en el patrón MVC para la gestión del catálogo de libros de una biblioteca escolar.
 
-Grupo: 2°E
+El sistema permite realizar operaciones CRUD (Crear, Leer, Actualizar y Eliminar) sobre los registros, aplicando principios de la Programación Orientada a Objetos (POO). Además, incorpora un sistema de persistencia de datos mediante archivos locales (`.csv`), asegurando que la información del catálogo se conserve entre las distintas ejecuciones del programa de manera autónoma, sin depender de bases de datos externas.
 
-Descripción del proyecto
+---
 
-Este proyecto consiste en el desarrollo de una aplicación de escritorio para la gestión de un catálogo de libros de una biblioteca escolar.
+## 2. Pasos de ejecución
 
-El sistema permite realizar operaciones CRUD (Crear, Leer, Actualizar y Eliminar) sobre los libros, además de mantener la información guardada mediante persistencia en archivo local, asegurando que los datos se conserven entre ejecuciones del programa.
+Al ser un proyecto gestionado con Maven, la ejecución es directa desde el IDE. Sigue estos pasos:
 
-La aplicación fue desarrollada utilizando JavaFX para la interfaz gráfica y aplicando principios básicos de la Programación Orientada a Objetos (POO).
+1. **Clonar el repositorio:** `git clone https://github.com/TU-USUARIO/utez-2e-libreria-javafx-equipo03.git`
 
-Objetivo
+2. **Abrir el proyecto:**
+    - Abre tu IDE (IntelliJ IDEA recomendado, NetBeans o Eclipse).
+    - Selecciona `Open` o `Import Project` y elige la carpeta raíz del repositorio clonado.
+    - Espera a que el IDE descargue las dependencias de JavaFX definidas en el archivo `pom.xml`.
 
-Desarrollar una aplicación de escritorio funcional que implemente:
+3. **Ejecutar la aplicación:**
+    - Navega hasta el paquete `src/main/java/com/resources/integradorabiblioteca/`.
+    - Localiza la clase `Launcher.java` (o `RunApplication.java`).
+    - Haz clic derecho sobre el archivo y selecciona **Run 'Launcher.main()'**.
 
-Un sistema CRUD completo
+---
 
-Persistencia de datos en archivo
+## 3. Explicación de Persistencia y Exportación (Reglas de Negocio)
 
-Validaciones de datos
+### Persistencia en Archivo Local
+El sistema no utiliza bases de datos ni depende únicamente de la memoria RAM. Utiliza un repositorio basado en archivos de texto estructurado (`.csv`) ubicado en la ruta `data/books.csv`.
+* **Al iniciar la aplicación (Read):** El servicio lee el archivo línea por línea, separando los datos por comas, e instancia los objetos de tipo `Book` para mostrarlos en la tabla. Si el archivo no existe, el sistema lo crea automáticamente.
+* **Al modificar datos (Write):** Cada vez que se ejecuta una operación de Alta, Actualización o Eliminación, el sistema reescribe el archivo `books.csv` con la lista actualizada de la memoria. Esto garantiza que ante un cierre inesperado, el último estado de la tabla siempre esté guardado.
 
-Manejo de errores
+### Exportación del Reporte
+Como funcionalidad extra, el sistema incluye un botón para generar un reporte del catálogo. Al accionarlo, el sistema toma la lista actual de libros y genera un nuevo archivo llamado `reporte_catalogo.csv` en la raíz del proyecto. Este archivo incluye encabezados de columna y puede ser abierto en software de hojas de cálculo (como Excel) para auditorías externas.
 
-Interfaz gráfica con múltiples pantallas
+---
 
-Requerimientos de software
+## 4. Arquitectura de la Interfaz (JavaFX)
 
+La aplicación cuenta con 3 pantallas principales para separar las responsabilidades visuales:
 
+1. **Pantalla Principal (Catálogo):**
+    - Tabla interactiva con las columnas: ISBN/ID, Título, Autor, Año, Género y Disponibilidad.
+    - Botones de acción principales (Nuevo, Editar, Eliminar, Ver Detalle, Exportar Reporte).
+2. **Pantalla de Formulario (Altas y Ediciones):**
+    - Campos de texto y selección para capturar los datos del libro.
+    - Lógica compartida: se adapta dinámicamente si se va a registrar un nuevo libro o a editar uno existente (bloqueando la edición del ISBN).
+3. **Pantalla de Detalle:**
+    - Vista de solo lectura que muestra la información completa del registro seleccionado sin riesgo de modificación accidental.
 
-Para ejecutar el proyecto se necesita:
+---
 
-Java JDK 8 o superior
+## 5. Validaciones y Manejo de Errores
 
-JavaFX SDK (compatible con la versión de Java)
-
-IDE recomendado: IntelliJ IDEA / NetBeans / Eclipse
-
-Sistema operativo: Windows, Linux o macOS
-
-
-Funcionalidades:
-
-CRUD de libros
-
-Alta: Registro de nuevos libros mediante formulario
-
-Consulta: Visualización del catálogo en una tabla
-
-Actualización: Edición de libros existentes
-
-Eliminación: Eliminación con confirmación
-
-Persistencia en archivo
-
-Guardado de datos en archivo .csv o .txt
-
-Carga automática al iniciar la aplicación
-
-Actualización del archivo al modificar datos
-
-Validaciones
-
-Campos obligatorios (no vacíos)
-
-Título y autor con mínimo 3 caracteres
-
-Año numérico dentro de un rango válido
-
-Evitar duplicados por ISBN o ID
-
-Funcionalidades extra
-
-Pantalla de detalle del libro
-
-Exportación de reporte (reporte_catalogo.csv)
-
-Interfaz de usuario
-
-La aplicación cuenta con 3 pantallas principales:
-
-1. Pantalla principal
-Tabla (TableView) con columnas:
-ISBN/ID
-
-Título
-
-Autor
-
-Año
-
-Género
-
-Disponibilidad
-
-
-Botones:
-
-Nuevo
-
-Editar
-
-Eliminar
-
-Ver detalle
-
-Exportar reporte
-
-3. Formulario
-   
-Campos para registrar o editar libros
-
-Botones:
-
-Guardar
-
-Cancelar
-
-5. Pantalla de detalle
-   
-Muestra la información completa del libro
-
-Botón para regresar
-
-Persistencia de datos
-
-El sistema utiliza archivos locales para almacenar la información de los libros.
-
-Formato: .csv o .txt
-
-Al iniciar: se cargan los datos desde el archivo
-
-Al realizar cambios: se actualiza automáticamente el archivo
-
-Permite mantener la información entre ejecuciones
-
-Exportación de reporte
-
-
-Se genera un archivo llamado:
-
-reporte_catalogo.csv
-
-Este archivo contiene todos los libros registrados en el sistema en formato estructurado, permitiendo su uso externo (por ejemplo, en Excel).
+El sistema implementa manejo de excepciones (`try/catch`) y reglas de negocio obligatorias:
+- **Campos vacíos:** No se permite registrar ni actualizar si hay campos en blanco.
+- **Longitud de texto:** El título y el autor requieren un mínimo de 3 caracteres.
+- **Rango numérico:** El año de publicación debe ser un número entero válido comprendido entre el año 1500 y el año actual.
+- **Integridad de datos:** No se permite el registro de dos libros con el mismo ISBN/ID (validación de duplicidad).
