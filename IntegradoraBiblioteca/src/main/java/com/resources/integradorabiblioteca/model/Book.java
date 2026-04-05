@@ -44,4 +44,13 @@ public class Book {
     public void setGenero(String genero) { this.genero = genero; }
     public boolean isDisponible() { return disponible; }
     public void setDisponible(boolean disponible) { this.disponible = disponible; }
+
+    /**
+     * Devuelve los atributos del libro separados por comas.
+     * @return representación en texto del libro
+     */
+    @Override
+    public String toString() {
+        return isbn + "," + titulo + "," + autor + "," + anio + "," + genero + "," + disponible;
+    }
 }
