@@ -2,6 +2,7 @@ package com.resources.integradorabiblioteca.repositories;
 
 import com.resources.integradorabiblioteca.model.*;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
@@ -17,7 +18,10 @@ public class ReportExporter {
      * @throws IOException si ocurre un error de escritura
      */
     public void exportarCatalogo(List<Book> listaLibros) throws IOException {
-        BufferedWriter escritor = new BufferedWriter(new FileWriter("reporte_catalogo.csv"));
+        String carpetaUsuario = System.getProperty("user.home");
+        String rutaDescargas = carpetaUsuario + File.separator + "Downloads" + File.separator + "reporte_catalogo.csv";
+
+        BufferedWriter escritor = new BufferedWriter(new FileWriter(rutaDescargas));
 
         escritor.write("ISBN,Titulo,Autor,Anio,Genero,Disponible");
         escritor.newLine();
