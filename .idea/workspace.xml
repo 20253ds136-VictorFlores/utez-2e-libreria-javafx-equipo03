@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f5362ae0-0f76-4ffb-9527-08d33b4c7094" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/IntegradoraBiblioteca/src/main/java/com/resources/integradorabiblioteca/model/Book.java" beforeDir="false" afterPath="$PROJECT_DIR$/IntegradoraBiblioteca/src/main/java/com/resources/integradorabiblioteca/model/Book.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -81,7 +81,7 @@
       <option name="presentableId" value="Default" />
       <updated>1774160297604</updated>
       <workItem from="1774160298857" duration="305000" />
-      <workItem from="1775420320305" duration="365000" />
+      <workItem from="1775420320305" duration="662000" />
     </task>
     <servers />
   </component>
