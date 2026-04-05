@@ -6,4 +6,10 @@ module com.resources.integradorabiblioteca {
 
     opens com.resources.integradorabiblioteca to javafx.fxml;
     exports com.resources.integradorabiblioteca;
+
+    opens com.resources.integradorabiblioteca.controllers to javafx.fxml;
+    exports com.resources.integradorabiblioteca.controllers;
+
+    opens com.resources.integradorabiblioteca.model to javafx.base;
+    exports com.resources.integradorabiblioteca.model;
 }
