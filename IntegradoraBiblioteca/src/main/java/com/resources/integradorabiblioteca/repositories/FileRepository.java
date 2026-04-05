@@ -48,4 +48,18 @@ public class FileRepository {
         return listaLibros;
     }
 
+    /**
+     * Guarda la lista de libros en el archivo CSV.
+     * @param listaLibros colección de libros a persistir
+     * @throws IOException si ocurre un error de escritura
+     */
+    public void saveBooks(List<Book> listaLibros) throws IOException {
+        BufferedWriter escritor = new BufferedWriter(new FileWriter(RUTA_ARCHIVO));
+
+        for (Book libro : listaLibros) {
+            escritor.write(libro.toString());
+            escritor.newLine();
+        }
+        escritor.close();
+    }
 }
