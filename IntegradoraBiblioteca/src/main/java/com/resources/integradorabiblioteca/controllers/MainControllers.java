@@ -121,7 +121,7 @@ public class MainControllers {
     private void onExportClick() {
         try {
             service.exportarReporte();
-            mostrarAlerta("Exportación Exitosa", "Se generó el archivo reporte_catalogo.csv correctamente.");
+            mostrarAlerta("Exportación Exitosa", "Se generó el archivo reporte_catalogo.csv en tu carpeta de Descargas.");
         } catch (Exception e) {
             mostrarAlerta("Error", "Fallo al exportar el reporte.");
         }
