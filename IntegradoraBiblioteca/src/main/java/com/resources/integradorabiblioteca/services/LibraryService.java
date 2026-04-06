@@ -15,7 +15,7 @@ public class LibraryService {
     final int CHARLIMIT=3;
     private FileRepository fileRepository;
     private ReportExporter reportExporter;
-    private List<Book> catalogo;
+    private List<Libro> catalogo;
 
     /**
      * Inicializa el servicio cargando el catálogo desde archivo.
@@ -34,7 +34,7 @@ public class LibraryService {
      * Devuelve el catálogo actual.
      * @return lista de libros
      */
-    public List<Book> getCatalogo() {
+    public List<Libro> getCatalogo() {
         return catalogo;
     }
 
@@ -43,7 +43,7 @@ public class LibraryService {
      * @param nuevoLibro libro a registrar
      * @throws Exception si no cumple reglas de validación
      */
-    public void agregarLibro(Book nuevoLibro) throws Exception {
+    public void agregarLibro(Libro nuevoLibro) throws Exception {
         validar(nuevoLibro, true);
         catalogo.add(nuevoLibro);
         fileRepository.saveBooks(catalogo);
@@ -54,7 +54,7 @@ public class LibraryService {
      * @param libroEditado libro con datos modificados
      * @throws Exception si no cumple reglas de validación
      */
-    public void actualizarLibro(Book libroEditado) throws Exception {
+    public void actualizarLibro(Libro libroEditado) throws Exception {
         validar(libroEditado, false);
         for (int i = 0; i < catalogo.size(); i++) {
             if (catalogo.get(i).getIsbn().equals(libroEditado.getIsbn())) {
@@ -71,8 +71,8 @@ public class LibraryService {
      * @throws IOException si falla la persistencia
      */
     public void eliminarLibro(String isbn) throws IOException {
-        Book libroAEliminar = null;
-        for (Book libro : catalogo) {
+        Libro libroAEliminar = null;
+        for (Libro libro : catalogo) {
             if (libro.getIsbn().equals(isbn)) {
                 libroAEliminar = libro;
                 break;
@@ -98,7 +98,7 @@ public class LibraryService {
      * @param esNuevo true si es alta, false si es edición
      * @throws Exception si alguna regla se incumple
      */
-    private void validar(Book libro, boolean esNuevo) throws Exception {
+    private void validar(Libro libro, boolean esNuevo) throws Exception {
         if (libro.getIsbn().trim().isEmpty() || libro.getTitulo().trim().isEmpty() ||
                 libro.getAutor().trim().isEmpty() || libro.getGenero().trim().isEmpty()) {
             throw new Exception("Los campos obligatorios no pueden estar vacíos.");
@@ -113,7 +113,7 @@ public class LibraryService {
         }
 
         if (esNuevo) {
-            for (Book b : catalogo) {
+            for (Libro b : catalogo) {
                 if (b.getIsbn().equals(libro.getIsbn())) {
                     throw new Exception("El ISBN ingresado ya se encuentra registrado.");
                 }

@@ -1,6 +1,6 @@
 package com.resources.integradorabiblioteca.repositories;
 
-import com.resources.integradorabiblioteca.model.*;
+import com.resources.integradorabiblioteca.model.Libro;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +16,8 @@ public class FileRepository {
      * @return lista de libros cargados
      * @throws IOException si ocurre un error de lectura o creación del archivo
      */
-    public List<Book> loadBooks() throws IOException {
-        List<Book> listaLibros = new ArrayList<>();
+    public List<Libro> loadBooks() throws IOException {
+        List<Libro> listaLibros = new ArrayList<>();
         File archivo = new File(RUTA_ARCHIVO);
 
         if (!archivo.exists()) {
@@ -33,7 +33,7 @@ public class FileRepository {
             String[] datos = linea.split(",");
 
             if (datos.length == 6) {
-                Book libro = new Book(
+                Libro libro = new Libro(
                         datos[0],
                         datos[1],
                         datos[2],
@@ -53,10 +53,10 @@ public class FileRepository {
      * @param listaLibros colección de libros a persistir
      * @throws IOException si ocurre un error de escritura
      */
-    public void saveBooks(List<Book> listaLibros) throws IOException {
+    public void saveBooks(List<Libro> listaLibros) throws IOException {
         BufferedWriter escritor = new BufferedWriter(new FileWriter(RUTA_ARCHIVO));
 
-        for (Book libro : listaLibros) {
+        for (Libro libro : listaLibros) {
             escritor.write(libro.toString());
             escritor.newLine();
         }

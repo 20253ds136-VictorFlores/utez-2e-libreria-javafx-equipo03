@@ -3,7 +3,7 @@ package com.resources.integradorabiblioteca.model;
 /**
  * Modelo que representa un libro en el catálogo.
  */
-public class Book {
+public class Libro {
     private String isbn;
     private String titulo;
     private String autor;
@@ -20,7 +20,7 @@ public class Book {
      * @param genero género literario
      * @param disponible disponibilidad en el catálogo
      */
-    public Book(String isbn, String titulo, String autor, int anio, String genero, boolean disponible) {
+    public Libro(String isbn, String titulo, String autor, int anio, String genero, boolean disponible) {
         this.isbn = isbn;
         this.titulo = titulo;
         this.autor = autor;

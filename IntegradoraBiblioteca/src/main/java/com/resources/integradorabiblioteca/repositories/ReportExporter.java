@@ -17,7 +17,7 @@ public class ReportExporter {
      * @param listaLibros colección de libros a exportar
      * @throws IOException si ocurre un error de escritura
      */
-    public void exportarCatalogo(List<Book> listaLibros) throws IOException {
+    public void exportarCatalogo(List<Libro> listaLibros) throws IOException {
         String carpetaUsuario = System.getProperty("user.home");
         String rutaDescargas = carpetaUsuario + File.separator + "Downloads" + File.separator + "reporte_catalogo.csv";
 
@@ -26,7 +26,7 @@ public class ReportExporter {
         escritor.write("ISBN,Titulo,Autor,Anio,Genero,Disponible");
         escritor.newLine();
 
-        for (Book libro : listaLibros) {
+        for (Libro libro : listaLibros) {
             escritor.write(libro.toString());
             escritor.newLine();
         }
