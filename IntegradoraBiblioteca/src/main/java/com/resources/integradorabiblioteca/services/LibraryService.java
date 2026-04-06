@@ -50,6 +50,49 @@ public class LibraryService {
     }
 
     /**
+     * Actualiza un libro existente en el catálogo.
+     * @param libroEditado libro con datos modificados
+     * @throws Exception si no cumple reglas de validación
+     */
+    public void actualizarLibro(Book libroEditado) throws Exception {
+        validar(libroEditado, false);
+        for (int i = 0; i < catalogo.size(); i++) {
+            if (catalogo.get(i).getIsbn().equals(libroEditado.getIsbn())) {
+                catalogo.set(i, libroEditado);
+                break;
+            }
+        }
+        fileRepository.saveBooks(catalogo);
+    }
+
+    /**
+     * Elimina un libro por ISBN.
+     * @param isbn identificador único
+     * @throws IOException si falla la persistencia
+     */
+    public void eliminarLibro(String isbn) throws IOException {
+        Book libroAEliminar = null;
+        for (Book libro : catalogo) {
+            if (libro.getIsbn().equals(isbn)) {
+                libroAEliminar = libro;
+                break;
+            }
+        }
+        if (libroAEliminar != null) {
+            catalogo.remove(libroAEliminar);
+            fileRepository.saveBooks(catalogo);
+        }
+    }
+
+    /**
+     * Exporta el catálogo en formato de reporte.
+     * @throws IOException si falla la exportación
+     */
+    public void exportarReporte() throws IOException {
+        reportExporter.exportarCatalogo(catalogo);
+    }
+
+    /**
      * Valida reglas de negocio para un libro.
      * @param libro   libro a validar
      * @param esNuevo true si es alta, false si es edición
