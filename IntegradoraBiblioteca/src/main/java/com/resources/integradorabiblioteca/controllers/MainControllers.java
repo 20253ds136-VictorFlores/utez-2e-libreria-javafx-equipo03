@@ -22,56 +22,49 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Controlador principal de la aplicación.
- * Gestiona la vista del catálogo (tabla) y enruta las acciones del usuario
- * (nuevo, editar, eliminar, ver detalles) hacia las ventanas correspondientes.
+ * Controlador principal de la interfaz de usuario.
+ * Actúa como orquestador entre la vista del catálogo y los servicios de negocio,
+ * gestionando el ciclo de vida de las ventanas secundarias y la persistencia visual.
  */
 public class MainControllers {
 
-    // --- Componentes de la Interfaz (Inyectados desde main-view.fxml) ---
     @FXML private TableView<LibroModel> tablaLibros;
-    @FXML private TableColumn<LibroModel, String> colIsbn;
-    @FXML private TableColumn<LibroModel, String> colTitulo;
-    @FXML private TableColumn<LibroModel, String> colAutor;
+    @FXML private TableColumn<LibroModel, String> colIsbn, colTitulo, colAutor, colGenero;
     @FXML private TableColumn<LibroModel, Integer> colAnio;
-    @FXML private TableColumn<LibroModel, String> colGenero;
     @FXML private TableColumn<LibroModel, Boolean> colDisponible;
 
-    // --- Servicios de Lógica de Negocio ---
     private LibraryService libraryService;
     private ResenaService resenaService;
 
     /**
-     * Método que JavaFX ejecuta automáticamente al cargar la vista.
-     * Sirve para vincular las columnas de la tabla con los atributos del LibroModel.
+     * Inicializa la configuración de las columnas de la tabla.
+     * Vincula cada columna con su propiedad correspondiente en {@link LibroModel}.
      */
     @FXML
     public void initialize() {
-        colIsbn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getIsbn()));
-        colTitulo.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTitulo()));
-        colAutor.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getAutor()));
-        colAnio.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getAnio()).asObject());
-        colGenero.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getGenero()));
-        colDisponible.setCellValueFactory(cellData -> new SimpleBooleanProperty(cellData.getValue().isDisponible()).asObject());
+        colIsbn.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getIsbn()));
+        colTitulo.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getTitulo()));
+        colAutor.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getAutor()));
+        colAnio.setCellValueFactory(cd -> new SimpleIntegerProperty(cd.getValue().getAnio()).asObject());
+        colGenero.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getGenero()));
+
+        // Formateo visual: Convierte true/false en "Disponible/Prestado" o similar si se desea
+        colDisponible.setCellValueFactory(cd -> new SimpleBooleanProperty(cd.getValue().isDisponible()).asObject());
     }
 
     /**
-     * Inyecta los servicios necesarios para el funcionamiento del controlador principal.
-     * Al recibir los servicios, automáticamente llena la tabla con los datos.
-     * @param libraryService Servicio de libros.
-     * @param resenaService Servicio de reseñas.
+     * Inyecta las dependencias de servicio y sincroniza la tabla con los datos persistidos.
+     * * @param libraryService Servicio de gestión de libros.
+     * @param resenaService Servicio de gestión de reseñas.
      */
     public void setServicios(LibraryService libraryService, ResenaService resenaService) {
         this.libraryService = libraryService;
         this.resenaService = resenaService;
-
-        // ¡IMPORTANTE! Llamamos a refrescarTabla aquí para que
-        // los libros que ya existían en el CSV aparezcan al abrir el programa.
         refrescarTabla();
     }
 
     /**
-     * Acción del botón "Nuevo". Abre el formulario vacío para registrar un libro.
+     * Abre el formulario para registrar un nuevo ejemplar.
      */
     @FXML
     private void onNuevo() {
@@ -79,80 +72,68 @@ public class MainControllers {
     }
 
     /**
-     * Acción del botón "Editar". Abre el formulario cargando los datos del libro seleccionado.
+     * Gestiona la edición rápida de disponibilidad del libro seleccionado mediante un diálogo.
      */
     @FXML
     private void onEditar() {
         LibroModel seleccionado = tablaLibros.getSelectionModel().getSelectedItem();
 
-        if (seleccionado != null) {
-            Alert dialog = new Alert(Alert.AlertType.CONFIRMATION);
-            dialog.setTitle("Editar Disponibilidad");
+        if (seleccionado == null) {
+            mostrarMensaje("Selección requerida", "Por favor, selecciona un libro para editar su estado.");
+            return;
+        }
 
-            // AQUÍ USAMOS LOS MÉTODOS DEL MODELO
-            dialog.setHeaderText("Libro: " + seleccionado.getTitulo() + "\nISBN: " + seleccionado.getIsbn());
-            dialog.setContentText("Selecciona el nuevo estado:");
+        Alert dialog = new Alert(Alert.AlertType.CONFIRMATION);
+        dialog.setTitle("Cambiar Disponibilidad");
+        dialog.setHeaderText("Libro: " + seleccionado.getTitulo() + "\nISBN: " + seleccionado.getIsbn());
+        dialog.setContentText("Seleccione el nuevo estado del ejemplar:");
 
-            ButtonType btnDisponible = new ButtonType("Disponible");
-            ButtonType btnPrestado = new ButtonType("Prestado");
-            ButtonType btnCancelar = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType btnDisp = new ButtonType("Disponible");
+        ButtonType btnPrest = new ButtonType("Prestado");
+        ButtonType btnCanc = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
 
-            dialog.getButtonTypes().setAll(btnDisponible, btnPrestado, btnCancelar);
+        dialog.getButtonTypes().setAll(btnDisp, btnPrest, btnCanc);
 
-            Optional<ButtonType> resultado = dialog.showAndWait();
-            if (resultado.isPresent()) {
-                if (resultado.get() == btnDisponible) {
-                    seleccionado.setDisponible(true);
-                } else if (resultado.get() == btnPrestado) {
-                    seleccionado.setDisponible(false);
-                } else {
-                    return;
-                }
-
-                libraryService.actualizar(seleccionado);
-                refrescarTabla();
-            }
+        Optional<ButtonType> resultado = dialog.showAndWait();
+        if (resultado.isPresent() && resultado.get() != btnCanc) {
+            seleccionado.setDisponible(resultado.get() == btnDisp);
+            libraryService.actualizar(seleccionado);
+            refrescarTabla();
         }
     }
 
     /**
-     * Acción del botón "Eliminar". Elimina el libro seleccionado de la tabla y del archivo.
+     * Elimina permanentemente un libro tras la confirmación del usuario.
      */
     @FXML
     private void onEliminar() {
         LibroModel seleccionado = tablaLibros.getSelectionModel().getSelectedItem();
 
         if (seleccionado != null) {
-            // 1. Pedir confirmación al usuario (Buena práctica)
-            Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION, "¿Estás seguro de eliminar este libro?", ButtonType.YES, ButtonType.NO);
-            confirmacion.showAndWait();
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                    "¿Está seguro de eliminar el libro: " + seleccionado.getTitulo() + "?",
+                    ButtonType.YES, ButtonType.NO);
+            confirm.showAndWait();
 
-            if (confirmacion.getResult() == ButtonType.YES) {
-                // 2. Borrar del servicio (esto lo borra del CSV)
+            if (confirm.getResult() == ButtonType.YES) {
                 libraryService.eliminar(seleccionado.getIsbn());
-
                 refrescarTabla();
-                mostrarMensaje("Libro eliminado con éxito.");
+                mostrarMensaje("Éxito", "Libro eliminado correctamente.");
             }
         } else {
-            mostrarMensaje("Por favor, selecciona un libro de la tabla.");
+            mostrarError("Selección requerida", "Debe seleccionar un libro de la lista.");
         }
     }
 
     /**
-     * Abre la ventana modal de detalles para el libro seleccionado,
-     * inyectándole el servicio de reseñas para que busque sus comentarios.
+     * Despliega la vista detallada del libro seleccionado inyectando el servicio de reseñas.
      */
-    // Dentro de MainControllers.java
     @FXML
     private void onVerDetalle() {
-        System.out.println("DEBUG: Se presionó el botón Ver Detalle"); // Mira si esto sale en consola
-
         LibroModel seleccionado = tablaLibros.getSelectionModel().getSelectedItem();
 
         if (seleccionado == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING, "Por favor, selecciona un libro de la tabla.");
-            alert.showAndWait();
+            mostrarError("Selección requerida", "Seleccione un libro para ver sus detalles y reseñas.");
             return;
         }
 
@@ -161,87 +142,54 @@ public class MainControllers {
             Parent root = loader.load();
 
             DetailControllers controller = loader.getController();
-
-            // Verificamos que los servicios no sean nulos
             if (resenaService != null) {
                 controller.cargarDatos(seleccionado, resenaService);
-
-                Stage stage = new Stage();
-                stage.setTitle("Detalles de: " + seleccionado.getTitulo());
-                stage.setScene(new Scene(root));
-                stage.initModality(Modality.APPLICATION_MODAL);
-                stage.show();
-            } else {
-                System.err.println("ERROR: resenaService es NULL. Revisa RunApplication.");
+                mostrarVentanaModal("Detalles del Libro", root);
             }
-
-        } catch (Exception e) {
-            System.err.println("ERROR AL CARGAR LA VISTA: " + e.getMessage());
-            e.printStackTrace();
+        } catch (IOException e) {
+            mostrarError("Error de Vista", "No se pudo cargar la pantalla de detalles.");
         }
     }
 
     /**
-     * Acción del botón "Exportar reporte".
+     * Genera un archivo de texto con el estado actual del inventario.
      */
     @FXML
     private void onExportarReporte() {
-        // 1. Configurar el selector de archivos
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Guardar Reporte de Biblioteca");
+        fileChooser.setTitle("Exportar Inventario");
         fileChooser.setInitialFileName("reporte_biblioteca.txt");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivo de Texto", "*.txt"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Texto Plano", "*.txt"));
 
-        // 2. Mostrar la ventana para elegir ruta
         File file = fileChooser.showSaveDialog(tablaLibros.getScene().getWindow());
 
         if (file != null) {
             try (PrintWriter writer = new PrintWriter(file)) {
-                // Cabecera del reporte
-                writer.println("==========================================");
-                writer.println("      REPORTE GENERAL DE BIBLIOTECA       ");
-                writer.println("==========================================");
-                writer.println("Fecha: " + java.time.LocalDate.now());
-                writer.println();
-
                 List<LibroModel> lista = libraryService.listar();
-                int disponibles = 0;
+                long disponibles = lista.stream().filter(LibroModel::isDisponible).count();
 
-                for (LibroModel libro : lista) {
-                    String estado = libro.isDisponible() ? "[DISPONIBLE]" : "[PRESTADO]";
-                    if (libro.isDisponible()) disponibles++;
-
-                    writer.printf("ISBN: %s | %s - %s (%d) | %s%n",
-                            libro.getIsbn(),
-                            libro.getTitulo(),
-                            libro.getAutor(),
-                            libro.getAnio(),
-                            estado);
-                }
-
-                // Resumen final
-                writer.println();
-                writer.println("------------------------------------------");
-                writer.println("Total de libros: " + lista.size());
-                writer.println("Libros disponibles: " + disponibles);
-                writer.println("Libros prestados: " + (lista.size() - disponibles));
                 writer.println("==========================================");
+                writer.println("      INVENTARIO DE BIBLIOTECA           ");
+                writer.println("==========================================");
+                writer.println("Fecha de generación: " + java.time.LocalDate.now());
+                writer.println();
 
-                // Alerta de éxito
-                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Reporte exportado con éxito en: " + file.getAbsolutePath());
-                alert.setHeaderText(null);
-                alert.showAndWait();
+                lista.forEach(l -> writer.printf("[%s] %-25s | ISBN: %s%n",
+                        l.isDisponible() ? "DISP" : "PRES", l.getTitulo(), l.getIsbn()));
 
+                writer.println("\n------------------------------------------");
+                writer.println("Resumen: " + lista.size() + " libros totales.");
+                writer.println("Disponibles: " + disponibles + " | Prestados: " + (lista.size() - disponibles));
+
+                mostrarMensaje("Reporte Generado", "El archivo se guardó en: " + file.getName());
             } catch (IOException e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Error al crear el reporte: " + e.getMessage());
-                alert.showAndWait();
+                mostrarError("Error de Exportación", "No se pudo escribir el archivo.");
             }
         }
     }
 
     /**
-     * Método auxiliar para cargar y mostrar la ventana del formulario (form-view.fxml).
-     * @param libro Si es null, el formulario se abre vacío. Si tiene un libro, se abre para editar.
+     * Centraliza la lógica para abrir el formulario de gestión de libros.
      */
     private void abrirFormulario(LibroModel libro) {
         try {
@@ -249,54 +197,48 @@ public class MainControllers {
             Parent root = loader.load();
 
             FormControllers controller = loader.getController();
-
             controller.setService(this.libraryService);
             controller.setMainController(this);
 
-            if (libro != null) {
-                controller.cargarLibro(libro);
-            }
+            if (libro != null) controller.cargarLibro(libro);
 
-            Stage stage = new Stage();
-            stage.setTitle(libro == null ? "Nuevo Libro" : "Editar Libro");
-            stage.setScene(new Scene(root));
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.showAndWait();
-
+            mostrarVentanaModal(libro == null ? "Nuevo Registro" : "Editar Registro", root);
         } catch (IOException e) {
-            mostrarError("Error al abrir el formulario: " + e.getMessage());
+            mostrarError("Error de Sistema", "Error al cargar el formulario.");
         }
     }
 
     /**
-     * Actualiza los datos de la tabla (usado al iniciar y después de agregar/editar/eliminar).
+     * Sincroniza la tabla visual con la fuente de datos persistente.
      */
     public void refrescarTabla() {
-        // Verificamos que el servicio no sea null para evitar errores
         if (libraryService != null) {
-            // 1. Obtenemos la lista de libros desde el servicio
-            // NOTA: Asegúrate de que en LibraryService tu método se llame 'listar'
-            List<LibroModel> libros = libraryService.listar();
-
-            // 2. Le pasamos esa lista a la tabla de JavaFX
-            tablaLibros.getItems().setAll(libros);
-
-            // 3. (Opcional) Forzamos el refresco visual
+            tablaLibros.getItems().setAll(libraryService.listar());
             tablaLibros.refresh();
         }
     }
 
-    /**
-     * Método auxiliar para mostrar cuadros de diálogo de error.
-     */
-    private void mostrarError(String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.ERROR, mensaje, ButtonType.OK);
+    // --- Utilidades de Interfaz de Usuario ---
+
+    private void mostrarVentanaModal(String titulo, Parent root) {
+        Stage stage = new Stage();
+        stage.setTitle(titulo);
+        stage.setScene(new Scene(root));
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.showAndWait();
+    }
+
+    private void mostrarError(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
         alert.showAndWait();
     }
 
-    private void mostrarMensaje(String mensaje) {
+    private void mostrarMensaje(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Información");
+        alert.setTitle(titulo);
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
         alert.showAndWait();
