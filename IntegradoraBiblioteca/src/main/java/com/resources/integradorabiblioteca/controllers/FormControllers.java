@@ -10,7 +10,9 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 /**
- * Controlador para la ventana de formulario (Crear/Editar Libro).
+ * Controlador para la ventana de formulario de libros.
+ * Gestiona tanto la creación de nuevos ejemplares como la edición de los existentes,
+ * validando la integridad de los datos antes de su persistencia.
  */
 public class FormControllers {
 
@@ -26,27 +28,32 @@ public class FormControllers {
     private LibroModel libroEditando;
 
     /**
-     * Inyecta el servicio de biblioteca necesario para persistir los datos.
+     * Establece el servicio de lógica de negocio para la biblioteca.
+     * @param service Instancia de {@link LibraryService}.
      */
     public void setService(LibraryService service) {
         this.service = service;
     }
 
     /**
-     * Inyecta el controlador principal para poder refrescar la tabla al terminar.
+     * Establece la referencia al controlador principal para permitir la actualización de la UI.
+     * @param mainController Instancia del controlador de la vista principal.
      */
     public void setMainController(MainControllers mainController) {
         this.mainController = mainController;
     }
 
     /**
-     * Carga los datos de un libro existente en los campos del formulario.
-     * Si se llama a este método, el formulario entra en "modo edición".
+     * Prepara el formulario para la edición de un libro existente.
+     * Bloquea el campo ISBN para mantener la integridad referencial.
+     * @param libro El {@link LibroModel} cuyos datos se cargarán en los campos.
      */
     public void cargarLibro(LibroModel libro) {
         this.libroEditando = libro;
+
         txtIsbn.setText(libro.getIsbn());
-        txtIsbn.setEditable(false); // El ISBN no debe editarse
+        txtIsbn.setEditable(false); // Regla de negocio: El ISBN no es editable
+
         txtTitulo.setText(libro.getTitulo());
         txtAutor.setText(libro.getAutor());
         txtAnio.setText(String.valueOf(libro.getAnio()));
@@ -54,69 +61,97 @@ public class FormControllers {
         chkDisponible.setSelected(libro.isDisponible());
     }
 
+    /**
+     * Procesa la acción de guardado.
+     * Determina si se trata de una inserción nueva o una actualización basada en el contexto.
+     */
     @FXML
     private void onGuardar() {
-        // --- VALIDACIÓN DE INYECCIÓN ---
-        if (service == null || mainController == null) {
-            mostrarError("Error interno: Los servicios no fueron inyectados correctamente al formulario.");
+        if (!validarInyeccion() || !validarCampos()) {
             return;
         }
 
         try {
+            // Extracción y limpieza de datos
+            String isbn = txtIsbn.getText().trim();
+            String titulo = txtTitulo.getText().trim();
+            String autor = txtAutor.getText().trim();
+            int anio = Integer.parseInt(txtAnio.getText().trim());
+            String genero = txtGenero.getText().trim();
             boolean disponible = chkDisponible.isSelected();
 
             if (libroEditando == null) {
-                // MODO NUEVO: Validar campos vacíos antes de crear
-                if (txtIsbn.getText().isEmpty() || txtTitulo.getText().isEmpty()) {
-                    mostrarError("El ISBN y el Título son campos obligatorios.");
-                    return;
-                }
-
-                LibroModel nuevo = new LibroModel(
-                        txtIsbn.getText(),
-                        txtTitulo.getText(),
-                        txtAutor.getText(),
-                        Integer.parseInt(txtAnio.getText()),
-                        txtGenero.getText(),
-                        disponible
-                );
+                // Operación de creación
+                LibroModel nuevo = new LibroModel(isbn, titulo, autor, anio, genero, disponible);
                 service.agregar(nuevo);
             } else {
-                // MODO EDICIÓN: Solo actualizamos los valores permitidos
-                libroEditando.setTitulo(txtTitulo.getText());
-                libroEditando.setAutor(txtAutor.getText());
-                libroEditando.setAnio(Integer.parseInt(txtAnio.getText()));
-                libroEditando.setGenero(txtGenero.getText());
+                // Operación de actualización sobre objeto existente
+                libroEditando.setTitulo(titulo);
+                libroEditando.setAutor(autor);
+                libroEditando.setAnio(anio);
+                libroEditando.setGenero(genero);
                 libroEditando.setDisponible(disponible);
-
                 service.actualizar(libroEditando);
             }
 
-            // Notificar al MainController que los datos cambiaron
+            // Sincronización con la vista principal y cierre
             mainController.refrescarTabla();
             cerrarVentana();
 
         } catch (NumberFormatException e) {
-            mostrarError("El año debe ser un número válido.");
+            mostrarError("Formato de fecha inválido", "El año debe ser un número entero válido.");
         } catch (Exception e) {
-            mostrarError("Error al guardar: " + e.getMessage());
-            e.printStackTrace();
+            mostrarError("Error de persistencia", "No se pudo guardar la información: " + e.getMessage());
         }
     }
 
+    /**
+     * Valida que los campos obligatorios no estén vacíos.
+     * @return true si los campos son válidos.
+     */
+    private boolean validarCampos() {
+        if (txtIsbn.getText().trim().isEmpty() || txtTitulo.getText().trim().isEmpty()) {
+            mostrarError("Campos obligatorios", "El ISBN y el Título no pueden estar vacíos.");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Verifica que las dependencias necesarias hayan sido inyectadas.
+     */
+    private boolean validarInyeccion() {
+        if (service == null || mainController == null) {
+            mostrarError("Error de sistema", "Dependencias del controlador no inicializadas.");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Cierra el formulario sin realizar cambios.
+     */
     @FXML
     private void onCancelar() {
         cerrarVentana();
     }
 
+    /**
+     * Cierra la ventana actual obteniendo el Stage desde cualquier componente.
+     */
     private void cerrarVentana() {
         Stage stage = (Stage) txtIsbn.getScene().getWindow();
         stage.close();
     }
 
-    private void mostrarError(String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.ERROR, mensaje, ButtonType.OK);
+    /**
+     * Centraliza el manejo de mensajes de error para la interfaz.
+     */
+    private void mostrarError(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(titulo);
         alert.setHeaderText(null);
+        alert.setContentText(mensaje);
         alert.showAndWait();
     }
 }
