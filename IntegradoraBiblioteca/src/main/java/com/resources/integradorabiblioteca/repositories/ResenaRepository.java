@@ -1,76 +1,81 @@
 package com.resources.integradorabiblioteca.repositories;
 
 import com.resources.integradorabiblioteca.model.ResenaModel;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Repositorio encargado de la persistencia de los datos de las reseñas.
- * Almacena la información en un archivo de texto separado por punto y coma (;),
- * manteniendo las referencias cruzadas (llaves foráneas) hacia los Libros y los Usuarios.
+ * Repositorio especializado en la persistencia de reseñas.
+ * Gestiona el almacenamiento físico de las opiniones de los usuarios, manteniendo
+ * la integridad de las relaciones entre libros y autores en formato CSV.
  */
 public class ResenaRepository {
 
-    /** Ruta del archivo donde se guardarán las reseñas (ej. "data/resenas.csv"). */
     private final String filePath;
+    private static final String SEPARADOR = ";";
 
     /**
-     * Constructor del repositorio de reseñas.
-     * @param filePath La ruta del archivo de texto.
+     * Inicializa el repositorio de reseñas definiendo la ruta de almacenamiento.
+     * @param filePath Ruta del archivo persistente (ej. "data/resenas.csv").
      */
     public ResenaRepository(String filePath) {
         this.filePath = filePath;
     }
 
     /**
-     * Carga todas las reseñas desde el archivo.
-     * @return Una lista con los objetos {@link ResenaModel} recuperados.
+     * Recupera el histórico de reseñas desde el archivo local.
+     * Implementa un filtrado de líneas mal formadas para evitar excepciones en tiempo de ejecución.
+     * @return Lista de objetos {@link ResenaModel}.
      */
     public List<ResenaModel> load() {
         List<ResenaModel> resenas = new ArrayList<>();
         File file = new File(filePath);
 
-        // Si el archivo no existe (ej. primera vez que se ejecuta), retorna lista vacía
         if (!file.exists()) return resenas;
 
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
-                String[] data = line.split(";");
-                // Verifica que la línea tenga exactamente los 5 atributos de la reseña
-                if (data.length == 5) {
-                    resenas.add(new ResenaModel(
-                            data[0],                     // idResena
-                            data[1],                     // isbnLibro
-                            data[2],                     // idUsuario
-                            Integer.parseInt(data[3]),   // calificacion (convertido a int)
-                            data[4]                      // comentario
-                    ));
+                if (line.isBlank()) continue;
+
+                String[] data = line.split(SEPARADOR);
+                if (data.length >= 5) {
+                    try {
+                        resenas.add(new ResenaModel(
+                                data[0].trim(),                     // ID Reseña
+                                data[1].trim(),                     // ISBN Libro
+                                data[2].trim(),                     // ID Usuario
+                                Integer.parseInt(data[3].trim()),   // Calificación
+                                data[4].trim()                      // Comentario
+                        ));
+                    } catch (NumberFormatException e) {
+                        System.err.println("Dato numérico inválido en reseña: " + line);
+                    }
                 }
             }
         } catch (IOException e) {
-            System.err.println("Error al cargar las reseñas: " + e.getMessage());
+            System.err.println("Error crítico al cargar las reseñas: " + e.getMessage());
         }
         return resenas;
     }
 
     /**
-     * Guarda la lista completa de reseñas en el archivo, sobrescribiendo el contenido.
-     * @param resenas La lista de reseñas en memoria que se desea persistir.
+     * Persiste la colección completa de reseñas en el almacenamiento local.
+     * @param resenas Lista de reseñas a guardar.
      */
     public void save(List<ResenaModel> resenas) {
         try (PrintWriter pw = new PrintWriter(new FileWriter(filePath))) {
             for (ResenaModel resena : resenas) {
-                pw.println(resena.getIdResena() + ";" +
-                        resena.getIsbnLibro() + ";" +
-                        resena.getIdUsuario() + ";" +
-                        resena.getCalificacion() + ";" +
+                pw.printf("%s%s%s%s%s%s%d%s%s%n",
+                        resena.getIdResena(), SEPARADOR,
+                        resena.getIsbnLibro(), SEPARADOR,
+                        resena.getIdUsuario(), SEPARADOR,
+                        resena.getCalificacion(), SEPARADOR,
                         resena.getComentario());
             }
         } catch (IOException e) {
-            System.err.println("Error al guardar las reseñas: " + e.getMessage());
+            System.err.println("Fallo al persistir las reseñas: " + e.getMessage());
         }
     }
 }
