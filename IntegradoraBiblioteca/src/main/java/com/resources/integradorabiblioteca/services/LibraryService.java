@@ -85,11 +85,19 @@ public class LibraryService {
     }
 
     /**
-     * Exporta el catálogo en formato de reporte.
+     * Exporta el catálogo filtrando solo los libros que están disponibles.
      * @throws IOException si falla la exportación
      */
     public void exportarReporte() throws IOException {
-        reportExporter.exportarCatalogo(catalogo);
+        List<Libro> soloDisponibles = new java.util.ArrayList<>();
+
+        for (Libro libro : catalogo) {
+            if (libro.isDisponible()) {
+                soloDisponibles.add(libro);
+            }
+        }
+
+        reportExporter.exportarCatalogo(soloDisponibles);
     }
 
     /**

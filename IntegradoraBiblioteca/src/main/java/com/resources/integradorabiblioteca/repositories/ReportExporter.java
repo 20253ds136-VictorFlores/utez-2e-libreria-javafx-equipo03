@@ -19,7 +19,7 @@ public class ReportExporter {
      */
     public void exportarCatalogo(List<Libro> listaLibros) throws IOException {
         String carpetaUsuario = System.getProperty("user.home");
-        String rutaDescargas = carpetaUsuario + File.separator + "Downloads" + File.separator + "reporte_catalogo.csv";
+        String rutaDescargas = carpetaUsuario + File.separator + "Downloads" + File.separator + "reporte_libros_disponibles.csv";
 
         BufferedWriter escritor = new BufferedWriter(new FileWriter(rutaDescargas));
 

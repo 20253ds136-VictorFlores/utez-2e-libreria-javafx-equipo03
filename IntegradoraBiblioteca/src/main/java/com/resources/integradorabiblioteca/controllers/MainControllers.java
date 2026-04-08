@@ -86,7 +86,7 @@ public class MainControllers {
     }
 
     /**
-     * Acción para eliminar un registro seleccionado con doble confirmación (Vista nueva + Alerta).
+     * Acción para eliminar un registro seleccionado con doble confirmacion.
      */
     @FXML
     private void onDeleteClick() {
