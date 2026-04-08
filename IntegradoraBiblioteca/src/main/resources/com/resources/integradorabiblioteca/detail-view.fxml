@@ -3,7 +3,7 @@
 <?import javafx.scene.layout.*?>
 
 <VBox spacing="15" alignment="CENTER_LEFT" xmlns:fx="http://javafx.com/fxml" fx:controller="com.resources.integradorabiblioteca.controllers.DetailControllers" style="-fx-padding: 30; -fx-min-width: 300;">
-    <Label text="Ficha Técnica del Libro" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+    <Label text="Ficha Tecnica del Libro" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
     <GridPane hgap="15" vgap="10">
         <Label text="ISBN/ID:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
         <Label fx:id="lblIsbn" GridPane.rowIndex="0" GridPane.columnIndex="1"/>

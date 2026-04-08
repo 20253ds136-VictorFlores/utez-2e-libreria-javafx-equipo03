@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Repositorio para gestionar la persistencia de libros en archivo CSV.
+ * Repositorio para gestionar la persistencia de libros en archivo CSV
  */
 public class FileRepository {
     private final String RUTA_ARCHIVO = "data/books.csv";
 
     /**
-     * Carga los libros desde el archivo CSV.
+     * Carga los libros desde el archivo CSV
      * @return lista de libros cargados
      * @throws IOException si ocurre un error de lectura o creacion del archivo
      */
@@ -49,7 +49,7 @@ public class FileRepository {
     }
 
     /**
-     * Guarda la lista de libros en el archivo CSV.
+     * Guarda la lista de libros en el archivo CSV
      * @param listaLibros colección de libros a persistir
      * @throws IOException si ocurre un error de escritura
      */

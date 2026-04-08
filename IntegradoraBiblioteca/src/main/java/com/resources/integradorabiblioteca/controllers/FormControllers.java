@@ -72,7 +72,7 @@ public class FormControllers {
     }
 
     /**
-     * Accion para cancelar y cerrar formulario.
+     * Accion para cancelar y cerrar formulario
      */
     @FXML
     private void onCancelClick() {

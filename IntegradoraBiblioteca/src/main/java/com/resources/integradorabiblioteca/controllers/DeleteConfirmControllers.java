@@ -6,7 +6,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 /**
- * Controlador para la ventana de confirmación de eliminacion
+ * Controlador para la ventana de confirmacion de eliminacion
  * Requiere que el usuario valide la accion reescribiendo o pegando el ISBN
  */
 public class DeleteConfirmControllers {
@@ -43,7 +43,7 @@ public class DeleteConfirmControllers {
         String input = txtIsbnConfirm.getText();
 
         if (input == null || input.trim().isEmpty()) {
-            mostrarAlerta("Error", "El campo no puede estar vacio. Pegue el ISBN.");
+            mostrarAlerta("Error", "El campo no puede estar vacio.");
             return;
         }
 
@@ -51,7 +51,7 @@ public class DeleteConfirmControllers {
             confirmado = true;
             cerrarVentana();
         } else {
-            mostrarAlerta("Error", "El ISBN no coincide con el del libro seleccionado.");
+            mostrarAlerta("Error", "El ISBN no coincide.");
         }
     }
 
@@ -65,7 +65,7 @@ public class DeleteConfirmControllers {
     }
 
     /**
-     * Obtiene el escenario actual y lo cierra.
+     * Obtiene el escenario actual y lo cierra
      */
     private void cerrarVentana() {
         Stage stage = (Stage) txtIsbnConfirm.getScene().getWindow();

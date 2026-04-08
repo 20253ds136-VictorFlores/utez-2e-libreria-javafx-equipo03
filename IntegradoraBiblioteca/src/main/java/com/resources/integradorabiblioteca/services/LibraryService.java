@@ -7,8 +7,8 @@ import java.time.Year;
 import java.util.List;
 
 /**
- * Servicio para gestionar el catalogo de libros:
- * carga, alta, edicion, eliminacion y exportacion de reportes.
+ * Servicio para gestionar el catalogo de libros
+ * carga, alta, edicion, eliminacion y exportacion de reportes
  */
 public class LibraryService {
     final int ANIOLIMIT=1500;
@@ -18,7 +18,7 @@ public class LibraryService {
     private List<Libro> catalogo;
 
     /**
-     * Inicializa el servicio cargando el catalogo desde archivo.
+     * Inicializa el servicio cargando el catalogo desde archivo
      */
     public LibraryService() {
         this.fileRepository = new FileRepository();
@@ -31,7 +31,7 @@ public class LibraryService {
     }
 
     /**
-     * Devuelve el catalogo actual.
+     * Devuelve el catalogo actual
      * @return lista de libros
      */
     public List<Libro> getCatalogo() {
@@ -39,7 +39,7 @@ public class LibraryService {
     }
 
     /**
-     * Agrega un nuevo libro al catalogo.
+     * Agrega un nuevo libro al catalogo
      * @param nuevoLibro libro a registrar
      * @throws Exception si no cumple reglas de validacion
      */
@@ -50,7 +50,7 @@ public class LibraryService {
     }
 
     /**
-     * Actualiza un libro existente en el catalogo.
+     * Actualiza un libro existente en el catalogo
      * @param libroEditado libro con datos modificados
      * @throws Exception si no cumple reglas de validación
      */
@@ -66,7 +66,7 @@ public class LibraryService {
     }
 
     /**
-     * Elimina un libro por ISBN.
+     * Elimina un libro por ISBN
      * @param isbn identificador unico
      * @throws IOException si falla la persistencia
      */
@@ -85,8 +85,8 @@ public class LibraryService {
     }
 
     /**
-     * Exporta el catalogo filtrando solo los libros que están disponibles.
-     * @throws IOException si falla la exportación
+     * Exporta el catalogo filtrando solo los libros que estan disponibles.
+     * @throws IOException si falla la exportacion
      */
     public void exportarReporte() throws IOException {
         List<Libro> soloDisponibles = new java.util.ArrayList<>();
@@ -101,7 +101,7 @@ public class LibraryService {
     }
 
     /**
-     * Valida reglas de negocio para un libro.
+     * Valida reglas de negocio para un libro
      * @param libro   libro a validar
      * @param esNuevo true si es alta, false si es edicion
      * @throws Exception si alguna regla se incumple

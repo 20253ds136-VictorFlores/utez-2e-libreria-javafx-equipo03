@@ -14,8 +14,8 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 
 /**
- * Controlador principal de la interfaz.
- * Gestiona tabla de libros y acciones de usuario.
+ * Controlador principal de la interfaz
+ * Gestiona tabla de libros y acciones de usuario
  */
 public class MainControllers {
     @FXML private TableView<Libro> tableBooks;
@@ -29,7 +29,7 @@ public class MainControllers {
     private FilteredList<Libro> listaFiltrada;
 
     /**
-     * Inicializa el controlador y carga datos.
+     * Inicializa el controlador y carga datos
      */
     @FXML
     public void initialize() {

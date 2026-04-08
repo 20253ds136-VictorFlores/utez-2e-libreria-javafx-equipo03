@@ -1,7 +1,7 @@
 package com.resources.integradorabiblioteca.model;
 
 /**
- * Modelo que representa un libro en el catalogo.
+ * Modelo que representa un libro en el catalogo
  */
 public class Libro {
     private String isbn;
@@ -30,7 +30,7 @@ public class Libro {
     }
 
     /**
-     * Metodos de acceso (getters y setters).
+     * Metodos de acceso (getters y setters)
      */
     public String getIsbn() { return isbn; }
     public void setIsbn(String isbn) { this.isbn = isbn; }

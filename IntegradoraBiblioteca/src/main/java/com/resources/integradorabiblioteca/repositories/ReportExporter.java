@@ -8,12 +8,12 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Exporta el catálogo de libros a un archivo CSV.
+ * Exporta el catalogo de libros a un archivo CSV
  */
 public class ReportExporter {
 
     /**
-     * Genera un archivo CSV con los datos del catálogo.
+     * Genera un archivo CSV con los datos del catalogo
      * @param listaLibros colección de libros a exportar
      * @throws IOException si ocurre un error de escritura
      */
