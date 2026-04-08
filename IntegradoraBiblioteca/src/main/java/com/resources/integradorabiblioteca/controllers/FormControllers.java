@@ -7,8 +7,8 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 /**
- * Controlador del formulario de libros.
- * Permite crear o editar registros.
+ * Controlador del formulario de libros
+ * Permite crear o editar registros
  */
 public class FormControllers {
     @FXML private TextField txtIsbn, txtTitulo, txtAutor, txtAnio, txtGenero;
@@ -19,7 +19,7 @@ public class FormControllers {
     private boolean modoEdicion = false;
 
     /**
-     * Inicializa datos del formulario.
+     * Inicializa datos del formulario
      * @param service servicio de biblioteca
      * @param libro libro a editar, null si es nuevo
      * @param parentController controlador principal
@@ -41,7 +41,7 @@ public class FormControllers {
     }
 
     /**
-     * Acción para guardar libro nuevo o editado.
+     * Accion para guardar libro nuevo o editado
      */
     @FXML
     private void onSaveClick() {
@@ -65,14 +65,14 @@ public class FormControllers {
             cerrarVentana();
 
         } catch (NumberFormatException e) {
-            mostrarError("Formato de año incorrecto. Ingrese un valor numérico.");
+            mostrarError("Formato de año incorrecto. Ingrese un valor numerico.");
         } catch (Exception e) {
             mostrarError(e.getMessage());
         }
     }
 
     /**
-     * Acción para cancelar y cerrar formulario.
+     * Accion para cancelar y cerrar formulario.
      */
     @FXML
     private void onCancelClick() {
@@ -80,7 +80,7 @@ public class FormControllers {
     }
 
     /**
-     * Cierra la ventana actual.
+     * Cierra la ventana actual
      */
     private void cerrarVentana() {
         Stage stage = (Stage) txtIsbn.getScene().getWindow();
@@ -88,12 +88,12 @@ public class FormControllers {
     }
 
     /**
-     * Muestra un mensaje de error.
+     * Muestra un mensaje de error
      * @param mensaje texto del error
      */
     private void mostrarError(String mensaje) {
         Alert alerta = new Alert(Alert.AlertType.ERROR);
-        alerta.setTitle("Error de Validación");
+        alerta.setTitle("Error de Validacion");
         alerta.setHeaderText(null);
         alerta.setContentText(mensaje);
         alerta.showAndWait();

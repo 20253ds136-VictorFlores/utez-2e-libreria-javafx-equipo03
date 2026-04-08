@@ -23,7 +23,7 @@ public class ReportExporter {
 
         BufferedWriter escritor = new BufferedWriter(new FileWriter(rutaDescargas));
 
-        escritor.write("ISBN,Titulo,Autor,Anio,Genero,Disponible");
+        escritor.write("ISBN,Titulo,Autor,Año,Genero,Disponible");
         escritor.newLine();
 
         for (Libro libro : listaLibros) {

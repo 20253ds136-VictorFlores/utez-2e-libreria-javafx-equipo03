@@ -5,15 +5,15 @@
 <GridPane hgap="15" vgap="15" xmlns:fx="http://javafx.com/fxml" fx:controller="com.resources.integradorabiblioteca.controllers.FormControllers" style="-fx-padding: 25;">
     <Label text="ISBN / ID:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
     <TextField fx:id="txtIsbn" GridPane.rowIndex="0" GridPane.columnIndex="1" prefWidth="250"/>
-    <Label text="Título:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+    <Label text="Titulo:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
     <TextField fx:id="txtTitulo" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
     <Label text="Autor:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
     <TextField fx:id="txtAutor" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-    <Label text="Año de Publicación:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+    <Label text="Año de Publicacion:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
     <TextField fx:id="txtAnio" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-    <Label text="Género:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+    <Label text="Genero:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
     <TextField fx:id="txtGenero" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-    <Label text="¿Está Disponible?:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+    <Label text="¿Esta Disponible?:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
     <CheckBox fx:id="chkDisponible" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
     <HBox spacing="15" GridPane.rowIndex="6" GridPane.columnIndex="1" alignment="CENTER_RIGHT">
         <Button text="Cancelar" onAction="#onCancelClick"/>

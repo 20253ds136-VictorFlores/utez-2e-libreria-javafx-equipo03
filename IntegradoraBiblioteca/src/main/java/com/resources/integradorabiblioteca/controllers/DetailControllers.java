@@ -6,14 +6,14 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
 /**
- * Controlador de la vista de detalles.
- * Muestra información de un libro seleccionado.
+ * Controlador de la vista de detalles
+ * Muestra información de un libro seleccionado
  */
 public class DetailControllers {
     @FXML private Label lblIsbn, lblTitulo, lblAutor, lblAnio, lblGenero, lblDisponible;
 
     /**
-     * Carga los datos del libro en la vista.
+     * Carga los datos del libro en la vista
      * @param libro libro a mostrar
      */
     public void cargarDatos(Libro libro) {
@@ -26,7 +26,7 @@ public class DetailControllers {
     }
 
     /**
-     * Acción para cerrar la ventana de detalles.
+     * Accion para cerrar la ventana de detalles
      */
     @FXML
     private void onBackClick() {

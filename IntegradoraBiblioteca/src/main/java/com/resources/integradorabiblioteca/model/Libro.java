@@ -1,7 +1,7 @@
 package com.resources.integradorabiblioteca.model;
 
 /**
- * Modelo que representa un libro en el catálogo.
+ * Modelo que representa un libro en el catalogo.
  */
 public class Libro {
     private String isbn;
@@ -13,12 +13,12 @@ public class Libro {
 
     /**
      * Inicializa un libro con los datos dados.
-     * @param isbn código ISBN
-     * @param titulo título del libro
+     * @param isbn codigo ISBN
+     * @param titulo titulo del libro
      * @param autor autor del libro
-     * @param anio año de publicación
-     * @param genero género literario
-     * @param disponible disponibilidad en el catálogo
+     * @param anio año de publicacion
+     * @param genero genero literario
+     * @param disponible disponibilidad en el catalogo
      */
     public Libro(String isbn, String titulo, String autor, int anio, String genero, boolean disponible) {
         this.isbn = isbn;
@@ -30,7 +30,7 @@ public class Libro {
     }
 
     /**
-     * Métodos de acceso (getters y setters).
+     * Metodos de acceso (getters y setters).
      */
     public String getIsbn() { return isbn; }
     public void setIsbn(String isbn) { this.isbn = isbn; }
@@ -47,7 +47,7 @@ public class Libro {
 
     /**
      * Devuelve los atributos del libro separados por comas.
-     * @return representación en texto del libro
+     * @return representacion en texto del libro
      */
     @Override
     public String toString() {

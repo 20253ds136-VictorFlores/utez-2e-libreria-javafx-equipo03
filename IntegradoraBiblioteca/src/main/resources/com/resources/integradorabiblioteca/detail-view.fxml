@@ -7,13 +7,13 @@
     <GridPane hgap="15" vgap="10">
         <Label text="ISBN/ID:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
         <Label fx:id="lblIsbn" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-        <Label text="Título:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <Label text="Titulo:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
         <Label fx:id="lblTitulo" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
         <Label text="Autor:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
         <Label fx:id="lblAutor" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
         <Label text="Año:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
         <Label fx:id="lblAnio" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-        <Label text="Género:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <Label text="Genero:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
         <Label fx:id="lblGenero" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
         <Label text="Disponibilidad:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
         <Label fx:id="lblDisponible" GridPane.rowIndex="5" GridPane.columnIndex="1"/>

@@ -14,7 +14,7 @@ public class FileRepository {
     /**
      * Carga los libros desde el archivo CSV.
      * @return lista de libros cargados
-     * @throws IOException si ocurre un error de lectura o creación del archivo
+     * @throws IOException si ocurre un error de lectura o creacion del archivo
      */
     public List<Libro> loadBooks() throws IOException {
         List<Libro> listaLibros = new ArrayList<>();

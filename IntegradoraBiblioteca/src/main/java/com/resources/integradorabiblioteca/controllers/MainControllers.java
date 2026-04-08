@@ -35,7 +35,6 @@ public class MainControllers {
     public void initialize() {
         service = new LibraryService();
         configurarColumnas();
-
         listaObservable = FXCollections.observableArrayList(service.getCatalogo());
 
         listaFiltrada = new FilteredList<>(listaObservable, b -> true);
@@ -46,7 +45,7 @@ public class MainControllers {
     }
 
     /**
-     * Configura las columnas de la tabla.
+     * Configura las columnas de la tabla
      */
     private void configurarColumnas() {
         colIsbn.setCellValueFactory(new PropertyValueFactory<>("isbn"));
@@ -58,14 +57,14 @@ public class MainControllers {
     }
 
     /**
-     * Refresca la tabla con el catálogo actual manteniendo el filtro.
+     * Refresca la tabla con el catalogo actual manteniendo el filtro
      */
     public void actualizarTabla() {
         listaObservable.setAll(service.getCatalogo());
     }
 
     /**
-     * Acción para crear un nuevo registro.
+     * Accion para crear un nuevo registro
      */
     @FXML
     private void onNewClick() {
@@ -73,7 +72,7 @@ public class MainControllers {
     }
 
     /**
-     * Acción para editar un registro seleccionado.
+     * Accion para editar un registro seleccionado
      */
     @FXML
     private void onEditClick() {
@@ -81,12 +80,12 @@ public class MainControllers {
         if (seleccionado != null) {
             abrirFormulario(seleccionado);
         } else {
-            mostrarAlerta("Atención", "Seleccione un registro para editar.");
+            mostrarAlerta("Atencion", "Seleccione un registro para editar.");
         }
     }
 
     /**
-     * Acción para eliminar un registro seleccionado con doble confirmacion.
+     * Accion para eliminar un registro seleccionado con doble confirmacion
      */
     @FXML
     private void onDeleteClick() {
@@ -111,27 +110,27 @@ public class MainControllers {
                 if (controller.isConfirmado()) {
 
                     Alert confirmacionFinal = new Alert(Alert.AlertType.CONFIRMATION);
-                    confirmacionFinal.setTitle("Confirmación Final");
-                    confirmacionFinal.setHeaderText("Acción irreversible");
-                    confirmacionFinal.setContentText("¿Está completamente seguro de eliminar '" + seleccionado.getTitulo() + "'?");
+                    confirmacionFinal.setTitle("Confirmacion Final");
+                    confirmacionFinal.setHeaderText("Accion irreversible");
+                    confirmacionFinal.setContentText("¿Esta seguro de eliminar '" + seleccionado.getTitulo() + "'?");
 
                     if (confirmacionFinal.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
                         service.eliminarLibro(seleccionado.getIsbn());
                         actualizarTabla();
-                        mostrarAlerta("Éxito", "El registro se eliminó correctamente.");
+                        mostrarAlerta("Exito", "El registro se elimino correctamente.");
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                mostrarAlerta("Error Critico", "No se pudo cargar la vista de confirmación: " + e.getMessage());
+                mostrarAlerta("Error Critico", "No se pudo cargar la vista de confirmacion: " + e.getMessage());
             }
         } else {
-            mostrarAlerta("Atención", "Seleccione un registro para eliminar.");
+            mostrarAlerta("Atencion", "Seleccione un registro para eliminar.");
         }
     }
 
     /**
-     * Acción para mostrar detalles de un registro.
+     * Accion para mostrar detalles de un registro.
      */
     @FXML
     private void onDetailClick() {
@@ -155,20 +154,20 @@ public class MainControllers {
     }
 
     /**
-     * Acción para exportar el catálogo a reporte.
+     * Accion para exportar el catalogo a reporte.
      */
     @FXML
     private void onExportClick() {
         try {
             service.exportarReporte();
-            mostrarAlerta("Exportación Exitosa", "Se generó el archivo reporte_catalogo.csv en tu carpeta de Descargas.");
+            mostrarAlerta("Exportacion Exitosa", "Se genero el archivo reporte_libros_disponibles.csv en tu carpeta de Descargas.");
         } catch (Exception e) {
             mostrarAlerta("Error", "Fallo al exportar el reporte.");
         }
     }
 
     /**
-     * Abre formulario para crear o editar libro.
+     * Abre formulario para crear o editar libro
      * @param libro libro a editar, null si es nuevo
      */
     private void abrirFormulario(Libro libro) {
@@ -189,8 +188,8 @@ public class MainControllers {
     }
 
     /**
-     * Muestra una alerta informativa.
-     * @param titulo  título de la ventana
+     * Muestra una alerta informativa
+     * @param titulo  titulo de la ventana
      * @param mensaje contenido del mensaje
      */
     private void mostrarAlerta(String titulo, String mensaje) {
@@ -202,7 +201,7 @@ public class MainControllers {
     }
 
     /**
-     * Configura el TextField para filtrar la tabla en tiempo real.
+     * Configura el TextField para filtrar la tabla en tiempo real
      */
     private void configurarBuscador() {
         txtBusqueda.textProperty().addListener((observable, oldValue, newValue) -> {

@@ -7,8 +7,8 @@ import java.time.Year;
 import java.util.List;
 
 /**
- * Servicio para gestionar el catálogo de libros:
- * carga, alta, edición, eliminación y exportación de reportes.
+ * Servicio para gestionar el catalogo de libros:
+ * carga, alta, edicion, eliminacion y exportacion de reportes.
  */
 public class LibraryService {
     final int ANIOLIMIT=1500;
@@ -18,7 +18,7 @@ public class LibraryService {
     private List<Libro> catalogo;
 
     /**
-     * Inicializa el servicio cargando el catálogo desde archivo.
+     * Inicializa el servicio cargando el catalogo desde archivo.
      */
     public LibraryService() {
         this.fileRepository = new FileRepository();
@@ -26,12 +26,12 @@ public class LibraryService {
         try {
             this.catalogo = fileRepository.loadBooks();
         } catch (IOException e) {
-            System.err.println("Error inicializando el catálogo: " + e.getMessage());
+            System.err.println("Error inicializando el catalogo: " + e.getMessage());
         }
     }
 
     /**
-     * Devuelve el catálogo actual.
+     * Devuelve el catalogo actual.
      * @return lista de libros
      */
     public List<Libro> getCatalogo() {
@@ -39,9 +39,9 @@ public class LibraryService {
     }
 
     /**
-     * Agrega un nuevo libro al catálogo.
+     * Agrega un nuevo libro al catalogo.
      * @param nuevoLibro libro a registrar
-     * @throws Exception si no cumple reglas de validación
+     * @throws Exception si no cumple reglas de validacion
      */
     public void agregarLibro(Libro nuevoLibro) throws Exception {
         validar(nuevoLibro, true);
@@ -50,7 +50,7 @@ public class LibraryService {
     }
 
     /**
-     * Actualiza un libro existente en el catálogo.
+     * Actualiza un libro existente en el catalogo.
      * @param libroEditado libro con datos modificados
      * @throws Exception si no cumple reglas de validación
      */
@@ -67,7 +67,7 @@ public class LibraryService {
 
     /**
      * Elimina un libro por ISBN.
-     * @param isbn identificador único
+     * @param isbn identificador unico
      * @throws IOException si falla la persistencia
      */
     public void eliminarLibro(String isbn) throws IOException {
@@ -85,7 +85,7 @@ public class LibraryService {
     }
 
     /**
-     * Exporta el catálogo filtrando solo los libros que están disponibles.
+     * Exporta el catalogo filtrando solo los libros que están disponibles.
      * @throws IOException si falla la exportación
      */
     public void exportarReporte() throws IOException {
@@ -103,21 +103,21 @@ public class LibraryService {
     /**
      * Valida reglas de negocio para un libro.
      * @param libro   libro a validar
-     * @param esNuevo true si es alta, false si es edición
+     * @param esNuevo true si es alta, false si es edicion
      * @throws Exception si alguna regla se incumple
      */
     private void validar(Libro libro, boolean esNuevo) throws Exception {
         if (libro.getIsbn().trim().isEmpty() || libro.getTitulo().trim().isEmpty() ||
                 libro.getAutor().trim().isEmpty() || libro.getGenero().trim().isEmpty()) {
-            throw new Exception("Los campos obligatorios no pueden estar vacíos.");
+            throw new Exception("Los campos obligatorios no pueden estar vacios.");
         }
 
-        if (libro.getTitulo().length() < CHARLIMIT) throw new Exception("El título requiere mínimo 3 caracteres.");
-        if (libro.getAutor().length() < CHARLIMIT) throw new Exception("El autor requiere mínimo 3 caracteres.");
+        if (libro.getTitulo().length() < CHARLIMIT) throw new Exception("El titulo requiere minimo 3 caracteres.");
+        if (libro.getAutor().length() < CHARLIMIT) throw new Exception("El autor requiere minimo 3 caracteres.");
 
         int anioActual = Year.now().getValue();
         if (libro.getAnio() < ANIOLIMIT || libro.getAnio() > anioActual) {
-            throw new Exception("El año de publicación es inválido.");
+            throw new Exception("El año de publicacion es invalido.");
         }
 
         if (esNuevo) {
