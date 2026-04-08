@@ -11,6 +11,7 @@ import java.io.IOException;
  */
 public class RunApplication extends Application {
 
+
     /**
      * Inyecta la resolucion fundamental y el recurso FXML raiz en la primera etapa visual mostrada.
      * @param stage Contenedor primario instanciado nativamente por JavaFX.
