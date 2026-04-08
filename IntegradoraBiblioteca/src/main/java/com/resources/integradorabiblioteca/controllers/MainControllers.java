@@ -10,6 +10,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 
 /**
  * Controlador principal de la interfaz.
@@ -20,16 +22,27 @@ public class MainControllers {
     @FXML private TableColumn<Libro, String> colIsbn, colTitulo, colAutor, colGenero;
     @FXML private TableColumn<Libro, Integer> colAnio;
     @FXML private TableColumn<Libro, Boolean> colDisponible;
+    @FXML private TextField txtBusqueda;
 
     private LibraryService service;
+    private ObservableList<Libro> listaObservable;
+    private FilteredList<Libro> listaFiltrada;
 
     /**
      * Inicializa el controlador y carga datos.
      */
+    @FXML
     public void initialize() {
         service = new LibraryService();
         configurarColumnas();
-        actualizarTabla();
+
+        listaObservable = FXCollections.observableArrayList(service.getCatalogo());
+
+        listaFiltrada = new FilteredList<>(listaObservable, b -> true);
+
+        tableBooks.setItems(listaFiltrada);
+
+        configurarBuscador();
     }
 
     /**
@@ -45,10 +58,10 @@ public class MainControllers {
     }
 
     /**
-     * Refresca la tabla con el catálogo actual.
+     * Refresca la tabla con el catálogo actual manteniendo el filtro.
      */
     public void actualizarTabla() {
-        tableBooks.setItems(FXCollections.observableArrayList(service.getCatalogo()));
+        listaObservable.setAll(service.getCatalogo());
     }
 
     /**
@@ -73,17 +86,44 @@ public class MainControllers {
     }
 
     /**
-     * Acción para eliminar un registro seleccionado.
+     * Acción para eliminar un registro seleccionado con doble confirmación (Vista nueva + Alerta).
      */
     @FXML
     private void onDeleteClick() {
         Libro seleccionado = tableBooks.getSelectionModel().getSelectedItem();
+
         if (seleccionado != null) {
             try {
-                service.eliminarLibro(seleccionado.getIsbn());
-                actualizarTabla();
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/resources/integradorabiblioteca/delete-confirm-view.fxml"));
+                Parent root = loader.load();
+
+                DeleteConfirmControllers controller = loader.getController();
+                controller.inicializarDatos(seleccionado.getIsbn());
+
+                Stage stage = new Stage();
+                stage.setTitle("Verificacion de Seguridad");
+                stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+                stage.setScene(new Scene(root));
+                stage.setResizable(false);
+                stage.showAndWait();
+
+
+                if (controller.isConfirmado()) {
+
+                    Alert confirmacionFinal = new Alert(Alert.AlertType.CONFIRMATION);
+                    confirmacionFinal.setTitle("Confirmación Final");
+                    confirmacionFinal.setHeaderText("Acción irreversible");
+                    confirmacionFinal.setContentText("¿Está completamente seguro de eliminar '" + seleccionado.getTitulo() + "'?");
+
+                    if (confirmacionFinal.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                        service.eliminarLibro(seleccionado.getIsbn());
+                        actualizarTabla();
+                        mostrarAlerta("Éxito", "El registro se eliminó correctamente.");
+                    }
+                }
             } catch (Exception e) {
-                mostrarAlerta("Error", "No se pudo eliminar el registro: " + e.getMessage());
+                e.printStackTrace();
+                mostrarAlerta("Error Critico", "No se pudo cargar la vista de confirmación: " + e.getMessage());
             }
         } else {
             mostrarAlerta("Atención", "Seleccione un registro para eliminar.");
@@ -159,5 +199,26 @@ public class MainControllers {
         alerta.setHeaderText(null);
         alerta.setContentText(mensaje);
         alerta.showAndWait();
+    }
+
+    /**
+     * Configura el TextField para filtrar la tabla en tiempo real.
+     */
+    private void configurarBuscador() {
+        txtBusqueda.textProperty().addListener((observable, oldValue, newValue) -> {
+            listaFiltrada.setPredicate(libro -> {
+                if (newValue == null || newValue.isEmpty()) {
+                    return true;
+                }
+                String filtroLowerCase = newValue.toLowerCase();
+
+                if (libro.getTitulo().toLowerCase().contains(filtroLowerCase)) {
+                    return true;
+                } else if (libro.getIsbn().toLowerCase().contains(filtroLowerCase)) {
+                    return true;
+                }
+                return false;
+            });
+        });
     }
 }

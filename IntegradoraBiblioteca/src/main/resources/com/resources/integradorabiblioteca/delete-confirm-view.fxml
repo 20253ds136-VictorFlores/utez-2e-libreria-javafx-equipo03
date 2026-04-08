@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER" spacing="15.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.resources.integradorabiblioteca.controllers.DeleteConfirmControllers">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+    <Label text="Ingrese el ISBN para confirmar la eliminacion:" />
+
+    <TextField fx:id="txtIsbnTarget" editable="false" focusTraversable="false" style="-fx-background-color: transparent;  -fx-font-weight: bold; -fx-alignment: center;" />
+
+    <TextField fx:id="txtIsbnConfirm" promptText="Ingrese el ISBN aquí" />
+
+    <HBox alignment="CENTER" spacing="15.0">
+        <Button text="Cancelar" onAction="#onCancelarClick" />
+        <Button text="Confirmar" onAction="#onConfirmarClick" textFill="RED" />
+    </HBox>
+</VBox>

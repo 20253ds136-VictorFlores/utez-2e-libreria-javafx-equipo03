@@ -22,7 +22,7 @@ public class DetailControllers {
         lblAutor.setText(libro.getAutor());
         lblAnio.setText(String.valueOf(libro.getAnio()));
         lblGenero.setText(libro.getGenero());
-        lblDisponible.setText(libro.isDisponible() ? "Sí" : "No");
+        lblDisponible.setText(libro.isDisponible() ? "Si" : "No");
     }
 
     /**
