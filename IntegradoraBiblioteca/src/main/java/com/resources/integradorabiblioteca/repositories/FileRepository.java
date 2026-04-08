@@ -5,18 +5,28 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Gestiona la persistencia de datos en el sistema de archivos local mediante formato CSV.
+ * Esta clase se encarga de la serialización y deserialización de objetos {@link LibroModel},
+ * asegurando que la estructura del archivo se mantenga íntegra.
+ */
 public class FileRepository {
     private final String filePath;
-    private final String SEPARADOR = ";"; // Configurado con punto y coma
+    private final String SEPARADOR = ";"; // Delimitador estándar para evitar conflictos con comas en títulos
 
+    /**
+     * Inicializa el repositorio y garantiza la existencia del archivo de destino.
+     * @param filePath Ruta relativa o absoluta del archivo .csv
+     */
     public FileRepository(String filePath) {
         this.filePath = filePath;
         verificarArchivo();
     }
 
     /**
-     * Carga los libros desde el archivo CSV.
-     * El orden esperado es: ISBN;Título;Autor;Año;Género;Disponible
+     * Recupera la colección completa de libros almacenados en el disco.
+     * Realiza validaciones de formato por cada línea para prevenir errores de carga.
+     * @return Una lista de {@link LibroModel} con los datos recuperados.
      */
     public List<LibroModel> load() {
         List<LibroModel> libros = new ArrayList<>();
@@ -27,55 +37,61 @@ public class FileRepository {
         try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
             String linea;
             while ((linea = reader.readLine()) != null) {
-                if (linea.trim().isEmpty()) continue;
+                if (linea.isBlank()) continue; // Salta líneas vacías
 
                 String[] datos = linea.split(SEPARADOR);
 
-                // Verificamos que la línea tenga todas las columnas necesarias (6)
+                // Validación de integridad de columnas (Esperadas: 6)
                 if (datos.length >= 6) {
                     try {
-                        LibroModel libro = new LibroModel(
-                                datos[0].trim(),                     // ISBN
-                                datos[1].trim(),                     // Título (Índice 1)
-                                datos[2].trim(),                     // Autor (Índice 2)
-                                Integer.parseInt(datos[3].trim()),   // Año (Índice 3)
-                                datos[4].trim(),                     // Género
-                                Boolean.parseBoolean(datos[5].trim())// Disponible
-                        );
-                        libros.add(libro);
+                        libros.add(mapearLibro(datos));
                     } catch (NumberFormatException e) {
-                        System.err.println("Error de formato en línea: " + linea);
+                        System.err.println("Error de conversión numérica en el archivo: " + linea);
                     }
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error crítico al leer el repositorio: " + e.getMessage());
         }
         return libros;
     }
 
     /**
-     * Guarda la lista completa de libros en el archivo CSV.
+     * Mapea un arreglo de cadenas a una instancia de LibroModel.
+     */
+    private LibroModel mapearLibro(String[] datos) {
+        return new LibroModel(
+                datos[0].trim(),                     // ISBN
+                datos[1].trim(),                     // Título
+                datos[2].trim(),                     // Autor
+                Integer.parseInt(datos[3].trim()),   // Año
+                datos[4].trim(),                     // Género
+                Boolean.parseBoolean(datos[5].trim())// Disponible
+        );
+    }
+
+    /**
+     * Sobrescribe el archivo CSV con el estado actual de la lista de libros.
+     * @param libros Lista de libros a persistir.
      */
     public void save(List<LibroModel> libros) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
             for (LibroModel libro : libros) {
-                writer.println(
-                        libro.getIsbn() + SEPARADOR +
-                                libro.getTitulo() + SEPARADOR +
-                                libro.getAutor() + SEPARADOR +
-                                libro.getAnio() + SEPARADOR +
-                                libro.getGenero() + SEPARADOR +
-                                libro.isDisponible()
-                );
+                writer.printf("%s%s%s%s%s%s%d%s%s%s%b%n",
+                        libro.getIsbn(), SEPARADOR,
+                        libro.getTitulo(), SEPARADOR,
+                        libro.getAutor(), SEPARADOR,
+                        libro.getAnio(), SEPARADOR,
+                        libro.getGenero(), SEPARADOR,
+                        libro.isDisponible());
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("No se pudo guardar la información en el disco: " + e.getMessage());
         }
     }
 
     /**
-     * Crea la carpeta 'data' y el archivo si no existen para evitar errores.
+     * Verifica la existencia del archivo y crea las carpetas necesarias si faltan.
      */
     private void verificarArchivo() {
         try {
@@ -87,7 +103,7 @@ public class FileRepository {
                 archivo.createNewFile();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error al inicializar el almacenamiento: " + e.getMessage());
         }
     }
 }
