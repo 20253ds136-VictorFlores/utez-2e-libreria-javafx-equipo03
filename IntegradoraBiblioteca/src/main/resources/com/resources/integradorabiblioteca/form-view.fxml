@@ -1,14 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="CONTROLLER_NAME"
-            prefHeight="400.0" prefWidth="600.0">
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.resources.integradorabiblioteca.controllers.FormControllers"
+      spacing="15" alignment="CENTER">
 
-</AnchorPane>
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Registrar / Editar Libro"
+           style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+
+    <TextField fx:id="txtIsbn" promptText="ISBN"/>
+    <TextField fx:id="txtTitulo" promptText="Título"/>
+    <TextField fx:id="txtAutor" promptText="Autor"/>
+    <TextField fx:id="txtAnio" promptText="Año"/>
+    <TextField fx:id="txtGenero" promptText="Género"/>
+    <CheckBox fx:id="chkDisponible" text="Disponible"/>
+
+    <HBox spacing="15" alignment="CENTER">
+        <Button text="Guardar" style="-fx-background-color: lightgreen; -fx-font-weight: bold;" onAction="#onGuardar"/>
+        <Button text="Cancelar" style="-fx-background-color: lightcoral; -fx-font-weight: bold;" onAction="#onCancelar"/>
+    </HBox>
+</VBox>

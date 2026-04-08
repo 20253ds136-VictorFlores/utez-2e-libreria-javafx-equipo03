@@ -1,14 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="CONTROLLER_NAME"
-            prefHeight="400.0" prefWidth="600.0">
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.resources.integradorabiblioteca.controllers.MainControllers">
 
-</AnchorPane>
+    <!-- Título arriba -->
+    <top>
+        <Label text="Catálogo de Libros"
+               style="-fx-font-size: 20; -fx-font-weight: bold; -fx-padding: 10;"/>
+    </top>
+
+    <!-- Tabla en el centro -->
+    <center>
+        <TableView fx:id="tablaLibros" style="-fx-background-color: whitesmoke;">
+            <columns>
+                <TableColumn fx:id="colIsbn" text="ISBN"/>
+                <TableColumn fx:id="colTitulo" text="Título"/>
+                <TableColumn fx:id="colAutor" text="Autor"/>
+                <TableColumn fx:id="colAnio" text="Año"/>
+                <TableColumn fx:id="colGenero" text="Género"/>
+                <TableColumn fx:id="colDisponible" text="Disponible"/>
+            </columns>
+        </TableView>
+    </center>
+
+    <!-- Botones abajo -->
+    <bottom>
+        <HBox spacing="15" alignment="CENTER">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <children>
+                <Button text="Nuevo" style="-fx-background-color: lightgreen; -fx-font-weight: bold;" onAction="#onNuevo"/>
+                <Button text="Editar" style="-fx-background-color: lightblue; -fx-font-weight: bold;" onAction="#onEditar"/>
+                <Button text="Eliminar" style="-fx-background-color: lightcoral; -fx-font-weight: bold;" onAction="#onEliminar"/>
+                <Button text="Ver detalle" style="-fx-background-color: khaki; -fx-font-weight: bold;" onAction="#onVerDetalle"/>
+                <Button text="Exportar reporte" style="-fx-background-color: plum; -fx-font-weight: bold;" onAction="#onExportarReporte"/>
+            </children>
+        </HBox>
+    </bottom>
+</BorderPane>
