@@ -1,58 +1,80 @@
 package com.resources.integradorabiblioteca.controllers;
 
 import com.resources.integradorabiblioteca.model.LibroModel;
+import com.resources.integradorabiblioteca.model.ResenaModel;
+import com.resources.integradorabiblioteca.services.ResenaService;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 
-/**
- * Controlador de la interfaz gráfica para la vista de detalle de un libro.
- * Esta clase gestiona una ventana de solo lectura donde el usuario puede
- * visualizar toda la información de un libro específico sin posibilidad de editarla.
- */
 public class DetailControllers {
+    @FXML private Label lblIsbn, lblTitulo, lblAutor, lblAnio, lblGenero, lblDisponible;
+    @FXML private TableView<ResenaModel> tablaResenas;
+    @FXML private TableColumn<ResenaModel, String> colUsuario, colComentario;
+    @FXML private TableColumn<ResenaModel, Integer> colCalificacion;
 
-    /** Etiqueta (Label) de la interfaz para mostrar el ISBN. */
-    @FXML private Label lblIsbn;
+    @FXML private TextField txtCalificacion, txtComentario;
 
-    /** Etiqueta (Label) de la interfaz para mostrar el título. */
-    @FXML private Label lblTitulo;
+    private LibroModel libroActual;
+    private ResenaService resenaService;
 
-    /** Etiqueta (Label) de la interfaz para mostrar el autor. */
-    @FXML private Label lblAutor;
+    public void cargarDatos(LibroModel libro, ResenaService resenaService) {
+        this.libroActual = libro;
+        this.resenaService = resenaService;
 
-    /** Etiqueta (Label) de la interfaz para mostrar el año de publicación. */
-    @FXML private Label lblAnio;
-
-    /** Etiqueta (Label) de la interfaz para mostrar el género literario. */
-    @FXML private Label lblGenero;
-
-    /** Etiqueta (Label) de la interfaz para mostrar si el libro está disponible o no. */
-    @FXML private Label lblDisponible;
-
-    /**
-     * Recibe un objeto LibroModel y puebla las etiquetas de la interfaz con sus datos.
-     * Añade prefijos descriptivos (ej. "Título: ") para mejorar la presentación
-     * en pantalla y formatea el valor booleano de disponibilidad a "Sí" o "No".
-     * * @param libro Instancia de {@link LibroModel} cuyos detalles se van a mostrar.
-     */
-    public void setLibro(LibroModel libro) {
+        // Llenar etiquetas
         lblIsbn.setText("ISBN: " + libro.getIsbn());
         lblTitulo.setText("Título: " + libro.getTitulo());
         lblAutor.setText("Autor: " + libro.getAutor());
         lblAnio.setText("Año: " + libro.getAnio());
         lblGenero.setText("Género: " + libro.getGenero());
         lblDisponible.setText("Disponible: " + (libro.isDisponible() ? "Sí" : "No"));
+
+        // Configurar tabla
+        colUsuario.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getIdUsuario()));
+        colCalificacion.setCellValueFactory(cd -> new SimpleIntegerProperty(cd.getValue().getCalificacion()).asObject());
+        colComentario.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getComentario()));
+
+        actualizarTabla();
     }
 
-    /**
-     * Método manejador de eventos asociado al botón de "Regresar" o "Cerrar".
-     * Obtiene la ventana (Stage) actual a partir de la escena de uno de los
-     * componentes gráficos (lblIsbn) y procede a cerrarla.
-     */
     @FXML
-    private void onRegresar() {
-        Stage stage = (Stage) lblIsbn.getScene().getWindow();
-        stage.close();
+    private void onAgregarResena() {
+        try {
+            int estrellas = Integer.parseInt(txtCalificacion.getText());
+            String texto = txtComentario.getText();
+
+            if (estrellas < 1 || estrellas > 5 || texto.isEmpty()) {
+                mostrarAlerta("Datos inválidos. Calificación 1-5 y comentario no vacío.");
+                return;
+            }
+
+            ResenaModel nueva = new ResenaModel(
+                    "R-" + System.currentTimeMillis(),
+                    libroActual.getIsbn(),
+                    "Invitado",
+                    estrellas,
+                    texto
+            );
+
+            resenaService.agregar(nueva);
+            txtCalificacion.clear();
+            txtComentario.clear();
+            actualizarTabla();
+
+        } catch (Exception e) {
+            mostrarAlerta("Error: La calificación debe ser un número.");
+        }
     }
+
+    private void actualizarTabla() {
+        tablaResenas.setItems(FXCollections.observableArrayList(resenaService.listarPorLibro(libroActual.getIsbn())));
+    }
+
+    @FXML private void onRegresar() { ((Stage) lblIsbn.getScene().getWindow()).close(); }
+
+    private void mostrarAlerta(String m) { new Alert(Alert.AlertType.INFORMATION, m).showAndWait(); }
 }

@@ -3,63 +3,50 @@ package com.resources.integradorabiblioteca.controllers;
 import com.resources.integradorabiblioteca.model.LibroModel;
 import com.resources.integradorabiblioteca.services.LibraryService;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 /**
- * Controlador de la interfaz gráfica para el formulario de registro y edición de libros.
- * Gestiona la captura de datos del usuario, la validación básica y la comunicación
- * con el servicio de la biblioteca para almacenar la información.
+ * Controlador para la ventana de formulario (Crear/Editar Libro).
  */
 public class FormControllers {
 
-    /** Campo de texto para ingresar o mostrar el ISBN (Identificador único) del libro. */
     @FXML private TextField txtIsbn;
-
-    /** Campo de texto para ingresar o mostrar el título del libro. */
     @FXML private TextField txtTitulo;
-
-    /** Campo de texto para ingresar o mostrar el autor del libro. */
     @FXML private TextField txtAutor;
-
-    /** Campo de texto para ingresar o mostrar el año de publicación del libro. */
     @FXML private TextField txtAnio;
-
-    /** Campo de texto para ingresar o mostrar el género literario del libro. */
     @FXML private TextField txtGenero;
-
-    /** Casilla de verificación que indica si el libro se encuentra disponible en la biblioteca. */
     @FXML private CheckBox chkDisponible;
 
-    /** Servicio de la biblioteca encargado de la lógica de negocio y persistencia de datos. */
     private LibraryService service;
-
-    /** Referencia al controlador de la ventana principal para poder actualizar sus vistas. */
     private MainControllers mainController;
+    private LibroModel libroEditando;
 
     /**
-     * Establece el servicio de la biblioteca que utilizará este controlador.
-     * * @param service Instancia de {@link LibraryService} para gestionar las operaciones de los libros.
+     * Inyecta el servicio de biblioteca necesario para persistir los datos.
      */
     public void setService(LibraryService service) {
         this.service = service;
     }
 
     /**
-     * Establece la referencia al controlador principal de la aplicación.
-     * * @param mainController Instancia de {@link MainControllers} para notificar cambios (ej. refrescar tablas).
+     * Inyecta el controlador principal para poder refrescar la tabla al terminar.
      */
     public void setMainController(MainControllers mainController) {
         this.mainController = mainController;
     }
 
     /**
-     * Precarga los campos del formulario con los datos de un libro existente.
-     * Este método es útil cuando se utiliza el formulario para editar en lugar de crear.
-     * * @param libro Instancia de {@link LibroModel} que contiene los datos a mostrar en pantalla.
+     * Carga los datos de un libro existente en los campos del formulario.
+     * Si se llama a este método, el formulario entra en "modo edición".
      */
     public void cargarLibro(LibroModel libro) {
+        this.libroEditando = libro;
         txtIsbn.setText(libro.getIsbn());
+        txtIsbn.setEditable(false); // El ISBN no debe editarse
         txtTitulo.setText(libro.getTitulo());
         txtAutor.setText(libro.getAutor());
         txtAnio.setText(String.valueOf(libro.getAnio()));
@@ -67,62 +54,69 @@ public class FormControllers {
         chkDisponible.setSelected(libro.isDisponible());
     }
 
-    /**
-     * Método manejador de eventos que se ejecuta al presionar el botón de "Guardar".
-     * Extrae los valores de los campos de texto, crea una nueva instancia de {@link LibroModel},
-     * e intenta registrarla a través del servicio.
-     * Si la operación es exitosa, actualiza la tabla principal y cierra la ventana del formulario.
-     * Si ocurre un error (como un ISBN duplicado o formato de número inválido), muestra una alerta.
-     */
     @FXML
     private void onGuardar() {
-        try {
-            LibroModel libro = new LibroModel(
-                    txtIsbn.getText(),
-                    txtTitulo.getText(),
-                    txtAutor.getText(),
-                    Integer.parseInt(txtAnio.getText()),
-                    txtGenero.getText(),
-                    chkDisponible.isSelected()
-            );
+        // --- VALIDACIÓN DE INYECCIÓN ---
+        if (service == null || mainController == null) {
+            mostrarError("Error interno: Los servicios no fueron inyectados correctamente al formulario.");
+            return;
+        }
 
-            if (!service.agregar(libro)) {
-                mostrarError("El ISBN ya existe.");
-                return;
+        try {
+            boolean disponible = chkDisponible.isSelected();
+
+            if (libroEditando == null) {
+                // MODO NUEVO: Validar campos vacíos antes de crear
+                if (txtIsbn.getText().isEmpty() || txtTitulo.getText().isEmpty()) {
+                    mostrarError("El ISBN y el Título son campos obligatorios.");
+                    return;
+                }
+
+                LibroModel nuevo = new LibroModel(
+                        txtIsbn.getText(),
+                        txtTitulo.getText(),
+                        txtAutor.getText(),
+                        Integer.parseInt(txtAnio.getText()),
+                        txtGenero.getText(),
+                        disponible
+                );
+                service.agregar(nuevo);
+            } else {
+                // MODO EDICIÓN: Solo actualizamos los valores permitidos
+                libroEditando.setTitulo(txtTitulo.getText());
+                libroEditando.setAutor(txtAutor.getText());
+                libroEditando.setAnio(Integer.parseInt(txtAnio.getText()));
+                libroEditando.setGenero(txtGenero.getText());
+                libroEditando.setDisponible(disponible);
+
+                service.actualizar(libroEditando);
             }
 
+            // Notificar al MainController que los datos cambiaron
             mainController.refrescarTabla();
             cerrarVentana();
 
+        } catch (NumberFormatException e) {
+            mostrarError("El año debe ser un número válido.");
         } catch (Exception e) {
             mostrarError("Error al guardar: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    /**
-     * Método manejador de eventos que se ejecuta al presionar el botón de "Cancelar".
-     * Cierra la ventana actual sin guardar ni modificar ningún dato.
-     */
     @FXML
     private void onCancelar() {
         cerrarVentana();
     }
 
-    /**
-     * Método auxiliar privado que obtiene la ventana (Stage) actual a partir de uno
-     * de los elementos de la interfaz (en este caso, txtIsbn) y la cierra.
-     */
     private void cerrarVentana() {
         Stage stage = (Stage) txtIsbn.getScene().getWindow();
         stage.close();
     }
 
-    /**
-     * Método auxiliar privado para mostrar mensajes de error al usuario mediante una ventana emergente.
-     * * @param mensaje El texto del error que se desea notificar al usuario.
-     */
     private void mostrarError(String mensaje) {
         Alert alert = new Alert(Alert.AlertType.ERROR, mensaje, ButtonType.OK);
+        alert.setHeaderText(null);
         alert.showAndWait();
     }
 }

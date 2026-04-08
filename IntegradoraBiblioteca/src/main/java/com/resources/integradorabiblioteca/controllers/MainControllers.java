@@ -1,178 +1,158 @@
 package com.resources.integradorabiblioteca.controllers;
 
 import com.resources.integradorabiblioteca.model.LibroModel;
-import com.resources.integradorabiblioteca.repositories.FileRepository;
-import com.resources.integradorabiblioteca.repositories.ReportExporter;
 import com.resources.integradorabiblioteca.services.LibraryService;
+import com.resources.integradorabiblioteca.services.ResenaService;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
+import java.util.Optional;
 
 /**
- * Controlador principal de la interfaz gráfica de la biblioteca.
- * Se encarga de gestionar la vista principal (tabla del catálogo),
- * coordinar las operaciones CRUD (Crear, Leer, Actualizar, Eliminar)
- * abriendo las ventanas modales correspondientes, y gestionar la exportación de reportes.
+ * Controlador principal de la aplicación.
+ * Gestiona la vista del catálogo (tabla) y enruta las acciones del usuario
+ * (nuevo, editar, eliminar, ver detalles) hacia las ventanas correspondientes.
  */
 public class MainControllers {
 
-    /** Tabla principal que muestra el catálogo de libros. */
+    // --- Componentes de la Interfaz (Inyectados desde main-view.fxml) ---
     @FXML private TableView<LibroModel> tablaLibros;
-
-    /** Columna de la tabla que muestra el ISBN del libro. */
     @FXML private TableColumn<LibroModel, String> colIsbn;
-
-    /** Columna de la tabla que muestra el título del libro. */
     @FXML private TableColumn<LibroModel, String> colTitulo;
-
-    /** Columna de la tabla que muestra el autor del libro. */
     @FXML private TableColumn<LibroModel, String> colAutor;
-
-    /** Columna de la tabla que muestra el año de publicación del libro. */
     @FXML private TableColumn<LibroModel, Integer> colAnio;
-
-    /** Columna de la tabla que muestra el género literario del libro. */
     @FXML private TableColumn<LibroModel, String> colGenero;
-
-    /** Columna de la tabla que muestra la disponibilidad del libro. */
     @FXML private TableColumn<LibroModel, Boolean> colDisponible;
 
-    /** * Servicio de la biblioteca. Se inicializa directamente inyectando
-     * un repositorio basado en archivos CSV para la persistencia de datos.
-     */
-    private final LibraryService service = new LibraryService(new FileRepository("data/libros.csv"));
+    // --- Servicios de Lógica de Negocio ---
+    private LibraryService libraryService;
+    private ResenaService resenaService;
 
     /**
-     * Método inicializador de JavaFX. Se ejecuta automáticamente después de
-     * que el archivo FXML ha sido cargado.
-     * Configura el mapeo de las propiedades del modelo ({@link LibroModel})
-     * a sus respectivas columnas en la tabla y carga los datos iniciales.
+     * Método que JavaFX ejecuta automáticamente al cargar la vista.
+     * Sirve para vincular las columnas de la tabla con los atributos del LibroModel.
      */
     @FXML
     public void initialize() {
-        colIsbn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getIsbn()));
-        colTitulo.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getTitulo()));
-        colAutor.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getAutor()));
-        colAnio.setCellValueFactory(data -> new javafx.beans.property.SimpleIntegerProperty(data.getValue().getAnio()).asObject());
-        colGenero.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getGenero()));
-        colDisponible.setCellValueFactory(data -> new javafx.beans.property.SimpleBooleanProperty(data.getValue().isDisponible()).asObject());
+        colIsbn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getIsbn()));
+        colTitulo.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTitulo()));
+        colAutor.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getAutor()));
+        colAnio.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getAnio()).asObject());
+        colGenero.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getGenero()));
+        colDisponible.setCellValueFactory(cellData -> new SimpleBooleanProperty(cellData.getValue().isDisponible()).asObject());
+    }
 
+    /**
+     * Inyecta los servicios necesarios para el funcionamiento del controlador principal.
+     * Al recibir los servicios, automáticamente llena la tabla con los datos.
+     * @param libraryService Servicio de libros.
+     * @param resenaService Servicio de reseñas.
+     */
+    public void setServicios(LibraryService libraryService, ResenaService resenaService) {
+        this.libraryService = libraryService;
+        this.resenaService = resenaService;
+
+        // ¡IMPORTANTE! Llamamos a refrescarTabla aquí para que
+        // los libros que ya existían en el CSV aparezcan al abrir el programa.
         refrescarTabla();
     }
 
     /**
-     * Actualiza el contenido de la tabla solicitando la lista completa
-     * de libros al servicio y recargando los elementos en el TableView.
-     */
-    public void refrescarTabla() {
-        tablaLibros.getItems().setAll(service.listar());
-    }
-
-    /**
-     * Manejador del evento para agregar un nuevo libro.
-     * Abre la ventana de formulario (`form-view.fxml`) en modo modal,
-     * inyectando el servicio y el controlador principal al controlador del formulario.
+     * Acción del botón "Nuevo". Abre el formulario vacío para registrar un libro.
      */
     @FXML
     private void onNuevo() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/resources/integradorabiblioteca/form-view.fxml"));
-            Parent root = loader.load();
-
-            FormControllers formController = loader.getController(); // plural
-            formController.setService(service);
-            formController.setMainController(this);
-
-            Stage stage = new Stage();
-            stage.setTitle("Registrar nuevo libro");
-            stage.setScene(new Scene(root));
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.showAndWait();
-
-        } catch (IOException e) {
-            e.printStackTrace(); // para ver la causa real en consola
-            mostrarError("Error al abrir formulario: " + e.getMessage());
-        }
+        abrirFormulario(null);
     }
 
     /**
-     * Manejador del evento para editar un libro existente.
-     * Verifica que haya un libro seleccionado en la tabla y, de ser así,
-     * abre el formulario de edición precargando los datos del libro.
+     * Acción del botón "Editar". Abre el formulario cargando los datos del libro seleccionado.
      */
     @FXML
     private void onEditar() {
         LibroModel seleccionado = tablaLibros.getSelectionModel().getSelectedItem();
-        if (seleccionado == null) {
-            mostrarError("Seleccione un libro para editar.");
-            return;
-        }
 
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/resources/integradorabiblioteca/form-view.fxml"));
-            Parent root = loader.load();
+        if (seleccionado != null) {
+            Alert dialog = new Alert(Alert.AlertType.CONFIRMATION);
+            dialog.setTitle("Editar Disponibilidad");
 
-            FormControllers formController = loader.getController();
-            formController.setService(service);
-            formController.setMainController(this);
+            // AQUÍ USAMOS LOS MÉTODOS DEL MODELO
+            dialog.setHeaderText("Libro: " + seleccionado.getTitulo() + "\nISBN: " + seleccionado.getIsbn());
+            dialog.setContentText("Selecciona el nuevo estado:");
 
-            // Aquí usamos el método público en lugar de acceder a los campos privados
-            formController.cargarLibro(seleccionado);
+            ButtonType btnDisponible = new ButtonType("Disponible");
+            ButtonType btnPrestado = new ButtonType("Prestado");
+            ButtonType btnCancelar = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
 
-            Stage stage = new Stage();
-            stage.setTitle("Editar libro");
-            stage.setScene(new Scene(root));
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.showAndWait();
+            dialog.getButtonTypes().setAll(btnDisponible, btnPrestado, btnCancelar);
 
-            refrescarTabla();
+            Optional<ButtonType> resultado = dialog.showAndWait();
+            if (resultado.isPresent()) {
+                if (resultado.get() == btnDisponible) {
+                    seleccionado.setDisponible(true);
+                } else if (resultado.get() == btnPrestado) {
+                    seleccionado.setDisponible(false);
+                } else {
+                    return;
+                }
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            mostrarError("Error al abrir formulario: " + e.getMessage());
+                libraryService.actualizar(seleccionado);
+                refrescarTabla();
+            }
         }
     }
 
     /**
-     * Manejador del evento para eliminar un libro.
-     * Pide confirmación al usuario mediante un cuadro de diálogo antes de
-     * proceder a eliminar el registro a través del servicio.
+     * Acción del botón "Eliminar". Elimina el libro seleccionado de la tabla y del archivo.
      */
     @FXML
     private void onEliminar() {
         LibroModel seleccionado = tablaLibros.getSelectionModel().getSelectedItem();
-        if (seleccionado == null) {
-            mostrarError("Seleccione un libro para eliminar.");
-            return;
-        }
 
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-                "¿Está seguro de eliminar el libro con ISBN " + seleccionado.getIsbn() + "?",
-                ButtonType.YES, ButtonType.NO);
-        confirm.showAndWait();
+        if (seleccionado != null) {
+            // 1. Pedir confirmación al usuario (Buena práctica)
+            Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION, "¿Estás seguro de eliminar este libro?", ButtonType.YES, ButtonType.NO);
+            confirmacion.showAndWait();
 
-        if (confirm.getResult() == ButtonType.YES) {
-            service.eliminar(seleccionado.getIsbn());
-            refrescarTabla();
+            if (confirmacion.getResult() == ButtonType.YES) {
+                // 2. Borrar del servicio (esto lo borra del CSV)
+                libraryService.eliminar(seleccionado.getIsbn());
+
+                refrescarTabla();
+                mostrarMensaje("Libro eliminado con éxito.");
+            }
+        } else {
+            mostrarMensaje("Por favor, selecciona un libro de la tabla.");
         }
     }
 
     /**
-     * Manejador del evento para visualizar los detalles de un libro.
-     * Abre una ventana de sólo lectura (`detail-view.fxml`) mostrando
-     * la información extendida del libro seleccionado.
+     * Abre la ventana modal de detalles para el libro seleccionado,
+     * inyectándole el servicio de reseñas para que busque sus comentarios.
      */
+    // Dentro de MainControllers.java
     @FXML
     private void onVerDetalle() {
+        System.out.println("DEBUG: Se presionó el botón Ver Detalle"); // Mira si esto sale en consola
+
         LibroModel seleccionado = tablaLibros.getSelectionModel().getSelectedItem();
+
         if (seleccionado == null) {
-            mostrarError("Seleccione un libro para ver detalle.");
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Por favor, selecciona un libro de la tabla.");
+            alert.showAndWait();
             return;
         }
 
@@ -180,45 +160,145 @@ public class MainControllers {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/resources/integradorabiblioteca/detail-view.fxml"));
             Parent root = loader.load();
 
-            DetailControllers detailController = loader.getController();
-            detailController.setLibro(seleccionado);
+            DetailControllers controller = loader.getController();
+
+            // Verificamos que los servicios no sean nulos
+            if (resenaService != null) {
+                controller.cargarDatos(seleccionado, resenaService);
+
+                Stage stage = new Stage();
+                stage.setTitle("Detalles de: " + seleccionado.getTitulo());
+                stage.setScene(new Scene(root));
+                stage.initModality(Modality.APPLICATION_MODAL);
+                stage.show();
+            } else {
+                System.err.println("ERROR: resenaService es NULL. Revisa RunApplication.");
+            }
+
+        } catch (Exception e) {
+            System.err.println("ERROR AL CARGAR LA VISTA: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Acción del botón "Exportar reporte".
+     */
+    @FXML
+    private void onExportarReporte() {
+        // 1. Configurar el selector de archivos
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Guardar Reporte de Biblioteca");
+        fileChooser.setInitialFileName("reporte_biblioteca.txt");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archivo de Texto", "*.txt"));
+
+        // 2. Mostrar la ventana para elegir ruta
+        File file = fileChooser.showSaveDialog(tablaLibros.getScene().getWindow());
+
+        if (file != null) {
+            try (PrintWriter writer = new PrintWriter(file)) {
+                // Cabecera del reporte
+                writer.println("==========================================");
+                writer.println("      REPORTE GENERAL DE BIBLIOTECA       ");
+                writer.println("==========================================");
+                writer.println("Fecha: " + java.time.LocalDate.now());
+                writer.println();
+
+                List<LibroModel> lista = libraryService.listar();
+                int disponibles = 0;
+
+                for (LibroModel libro : lista) {
+                    String estado = libro.isDisponible() ? "[DISPONIBLE]" : "[PRESTADO]";
+                    if (libro.isDisponible()) disponibles++;
+
+                    writer.printf("ISBN: %s | %s - %s (%d) | %s%n",
+                            libro.getIsbn(),
+                            libro.getTitulo(),
+                            libro.getAutor(),
+                            libro.getAnio(),
+                            estado);
+                }
+
+                // Resumen final
+                writer.println();
+                writer.println("------------------------------------------");
+                writer.println("Total de libros: " + lista.size());
+                writer.println("Libros disponibles: " + disponibles);
+                writer.println("Libros prestados: " + (lista.size() - disponibles));
+                writer.println("==========================================");
+
+                // Alerta de éxito
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Reporte exportado con éxito en: " + file.getAbsolutePath());
+                alert.setHeaderText(null);
+                alert.showAndWait();
+
+            } catch (IOException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Error al crear el reporte: " + e.getMessage());
+                alert.showAndWait();
+            }
+        }
+    }
+
+    /**
+     * Método auxiliar para cargar y mostrar la ventana del formulario (form-view.fxml).
+     * @param libro Si es null, el formulario se abre vacío. Si tiene un libro, se abre para editar.
+     */
+    private void abrirFormulario(LibroModel libro) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/resources/integradorabiblioteca/form-view.fxml"));
+            Parent root = loader.load();
+
+            FormControllers controller = loader.getController();
+
+            controller.setService(this.libraryService);
+            controller.setMainController(this);
+
+            if (libro != null) {
+                controller.cargarLibro(libro);
+            }
 
             Stage stage = new Stage();
-            stage.setTitle("Detalle del libro");
+            stage.setTitle(libro == null ? "Nuevo Libro" : "Editar Libro");
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
 
         } catch (IOException e) {
-            e.printStackTrace();
-            mostrarError("Error al abrir detalle: " + e.getMessage());
+            mostrarError("Error al abrir el formulario: " + e.getMessage());
         }
     }
 
     /**
-     * Manejador del evento para exportar el catálogo actual a un archivo CSV.
-     * Utiliza la clase {@link ReportExporter} y muestra un mensaje de éxito
-     * o error dependiendo del resultado de la operación.
+     * Actualiza los datos de la tabla (usado al iniciar y después de agregar/editar/eliminar).
      */
-    @FXML
-    private void onExportarReporte() {
-        try {
-            ReportExporter exporter = new ReportExporter("data/reporte_catalogo.csv");
-            exporter.export(service.listar());
-            Alert ok = new Alert(Alert.AlertType.INFORMATION, "Reporte exportado correctamente.", ButtonType.OK);
-            ok.showAndWait();
-        } catch (Exception e) {
-            e.printStackTrace();
-            mostrarError("Error al exportar reporte: " + e.getMessage());
+    public void refrescarTabla() {
+        // Verificamos que el servicio no sea null para evitar errores
+        if (libraryService != null) {
+            // 1. Obtenemos la lista de libros desde el servicio
+            // NOTA: Asegúrate de que en LibraryService tu método se llame 'listar'
+            List<LibroModel> libros = libraryService.listar();
+
+            // 2. Le pasamos esa lista a la tabla de JavaFX
+            tablaLibros.getItems().setAll(libros);
+
+            // 3. (Opcional) Forzamos el refresco visual
+            tablaLibros.refresh();
         }
     }
 
     /**
-     * Método auxiliar privado para mostrar mensajes de error al usuario.
-     * * @param mensaje El texto del error a mostrar en la alerta.
+     * Método auxiliar para mostrar cuadros de diálogo de error.
      */
     private void mostrarError(String mensaje) {
         Alert alert = new Alert(Alert.AlertType.ERROR, mensaje, ButtonType.OK);
+        alert.showAndWait();
+    }
+
+    private void mostrarMensaje(String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Información");
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
         alert.showAndWait();
     }
 }

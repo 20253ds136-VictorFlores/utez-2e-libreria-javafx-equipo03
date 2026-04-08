@@ -1,53 +1,51 @@
 package com.resources.integradorabiblioteca.repositories;
 
 import com.resources.integradorabiblioteca.model.LibroModel;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Repositorio de datos que gestiona la persistencia de los libros en un archivo de texto plano.
- * Funciona como la capa de acceso a datos, serializando y deserializando
- * los objetos {@link LibroModel} utilizando un formato separado por punto y coma (;).
- */
 public class FileRepository {
-
-    /** Ruta del archivo en el sistema donde se almacenarán los datos. */
     private final String filePath;
+    private final String SEPARADOR = ";"; // Configurado con punto y coma
 
-    /**
-     * Constructor del repositorio de archivos.
-     * * @param filePath La ruta relativa o absoluta del archivo de texto que
-     * se utilizará como base de datos (por ejemplo, "data/libros.csv").
-     */
     public FileRepository(String filePath) {
         this.filePath = filePath;
+        verificarArchivo();
     }
 
     /**
-     * Carga todos los libros almacenados en el archivo.
-     * Lee el archivo línea por línea, separando los atributos por el delimitador (;)
-     * y reconstruyendo las instancias de {@link LibroModel}.
-     * Si el archivo no existe, no arroja error, sino que retorna una lista vacía.
-     * * @return Una lista ({@link List}) que contiene todos los libros recuperados del archivo.
+     * Carga los libros desde el archivo CSV.
+     * El orden esperado es: ISBN;Título;Autor;Año;Género;Disponible
      */
     public List<LibroModel> load() {
         List<LibroModel> libros = new ArrayList<>();
-        File file = new File(filePath);
-        if (!file.exists()) return libros;
+        File archivo = new File(filePath);
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(";");
-                // Verifica que la línea tenga exactamente los 6 atributos requeridos
-                if (data.length == 6) {
-                    libros.add(new LibroModel(
-                            data[0], data[1], data[2],
-                            Integer.parseInt(data[3]),
-                            data[4], Boolean.parseBoolean(data[5])
-                    ));
+        if (!archivo.exists()) return libros;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
+            String linea;
+            while ((linea = reader.readLine()) != null) {
+                if (linea.trim().isEmpty()) continue;
+
+                String[] datos = linea.split(SEPARADOR);
+
+                // Verificamos que la línea tenga todas las columnas necesarias (6)
+                if (datos.length >= 6) {
+                    try {
+                        LibroModel libro = new LibroModel(
+                                datos[0].trim(),                     // ISBN
+                                datos[1].trim(),                     // Título (Índice 1)
+                                datos[2].trim(),                     // Autor (Índice 2)
+                                Integer.parseInt(datos[3].trim()),   // Año (Índice 3)
+                                datos[4].trim(),                     // Género
+                                Boolean.parseBoolean(datos[5].trim())// Disponible
+                        );
+                        libros.add(libro);
+                    } catch (NumberFormatException e) {
+                        System.err.println("Error de formato en línea: " + linea);
+                    }
                 }
             }
         } catch (IOException e) {
@@ -57,17 +55,36 @@ public class FileRepository {
     }
 
     /**
-     * Guarda la lista completa de libros en el archivo, sobrescribiendo
-     * cualquier contenido anterior.
-     * Transforma cada objeto {@link LibroModel} en una cadena de texto plana,
-     * uniendo sus atributos con un punto y coma (;) como delimitador.
-     * * @param libros La lista actual de libros en memoria que se desea persistir.
+     * Guarda la lista completa de libros en el archivo CSV.
      */
     public void save(List<LibroModel> libros) {
-        try (PrintWriter pw = new PrintWriter(new FileWriter(filePath))) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
             for (LibroModel libro : libros) {
-                pw.println(libro.getIsbn() + ";" + libro.getTitulo() + ";" + libro.getAutor() + ";" +
-                        libro.getAnio() + ";" + libro.getGenero() + ";" + libro.isDisponible());
+                writer.println(
+                        libro.getIsbn() + SEPARADOR +
+                                libro.getTitulo() + SEPARADOR +
+                                libro.getAutor() + SEPARADOR +
+                                libro.getAnio() + SEPARADOR +
+                                libro.getGenero() + SEPARADOR +
+                                libro.isDisponible()
+                );
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Crea la carpeta 'data' y el archivo si no existen para evitar errores.
+     */
+    private void verificarArchivo() {
+        try {
+            File archivo = new File(filePath);
+            if (archivo.getParentFile() != null) {
+                archivo.getParentFile().mkdirs();
+            }
+            if (!archivo.exists()) {
+                archivo.createNewFile();
             }
         } catch (IOException e) {
             e.printStackTrace();
