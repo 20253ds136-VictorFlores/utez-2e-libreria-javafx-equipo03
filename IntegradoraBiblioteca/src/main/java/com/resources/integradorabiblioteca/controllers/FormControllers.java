@@ -67,7 +67,62 @@ public class FormControllers {
         chkDisponible.setSelected(libro.isDisponible());
     }
 
+    /**
+     * Método manejador de eventos que se ejecuta al presionar el botón de "Guardar".
+     * Extrae los valores de los campos de texto, crea una nueva instancia de {@link LibroModel},
+     * e intenta registrarla a través del servicio.
+     * Si la operación es exitosa, actualiza la tabla principal y cierra la ventana del formulario.
+     * Si ocurre un error (como un ISBN duplicado o formato de número inválido), muestra una alerta.
+     */
+    @FXML
+    private void onGuardar() {
+        try {
+            LibroModel libro = new LibroModel(
+                    txtIsbn.getText(),
+                    txtTitulo.getText(),
+                    txtAutor.getText(),
+                    Integer.parseInt(txtAnio.getText()),
+                    txtGenero.getText(),
+                    chkDisponible.isSelected()
+            );
 
+            if (!service.agregar(libro)) {
+                mostrarError("El ISBN ya existe.");
+                return;
+            }
 
+            mainController.refrescarTabla();
+            cerrarVentana();
 
+        } catch (Exception e) {
+            mostrarError("Error al guardar: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Método manejador de eventos que se ejecuta al presionar el botón de "Cancelar".
+     * Cierra la ventana actual sin guardar ni modificar ningún dato.
+     */
+    @FXML
+    private void onCancelar() {
+        cerrarVentana();
+    }
+
+    /**
+     * Método auxiliar privado que obtiene la ventana (Stage) actual a partir de uno
+     * de los elementos de la interfaz (en este caso, txtIsbn) y la cierra.
+     */
+    private void cerrarVentana() {
+        Stage stage = (Stage) txtIsbn.getScene().getWindow();
+        stage.close();
+    }
+
+    /**
+     * Método auxiliar privado para mostrar mensajes de error al usuario mediante una ventana emergente.
+     * * @param mensaje El texto del error que se desea notificar al usuario.
+     */
+    private void mostrarError(String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.ERROR, mensaje, ButtonType.OK);
+        alert.showAndWait();
+    }
 }
