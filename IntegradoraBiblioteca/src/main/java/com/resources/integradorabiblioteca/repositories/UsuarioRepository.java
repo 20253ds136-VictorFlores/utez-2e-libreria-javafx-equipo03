@@ -1,7 +1,6 @@
 package com.resources.integradorabiblioteca.repositories;
 
 import com.resources.integradorabiblioteca.model.UsuarioModel;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,12 +12,12 @@ import java.util.List;
  */
 public class UsuarioRepository {
 
-    /** Ruta del archivo donde se almacenan los usuarios (ej. "data/usuarios.csv"). */
     private final String filePath;
+    private static final String SEPARADOR = ";";
 
     /**
      * Constructor del repositorio de usuarios.
-     * @param filePath La ruta del archivo de texto.
+     * @param filePath La ruta del archivo de texto (ej. "data/usuarios.csv").
      */
     public UsuarioRepository(String filePath) {
         this.filePath = filePath;
@@ -26,6 +25,7 @@ public class UsuarioRepository {
 
     /**
      * Carga todos los usuarios almacenados en el archivo.
+     * Implementa limpieza de datos para asegurar una comparación de credenciales precisa.
      * @return Una lista con los objetos {@link UsuarioModel} recuperados.
      */
     public List<UsuarioModel> load() {
@@ -37,18 +37,20 @@ public class UsuarioRepository {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
-                String[] data = line.split(";");
-                // Verifica que la línea tenga exactamente los 3 atributos del usuario
+                if (line.isBlank()) continue;
+
+                String[] data = line.split(SEPARADOR);
+                // Verifica que la línea tenga la estructura correcta (3 columnas)
                 if (data.length == 3) {
                     usuarios.add(new UsuarioModel(
-                            data[0], // idUsuario
-                            data[1], // nombreCompleto
-                            data[2]  // contrasena
+                            data[0].trim(), // idUsuario
+                            data[1].trim(), // nombreCompleto
+                            data[2].trim()  // contrasena
                     ));
                 }
             }
         } catch (IOException e) {
-            System.err.println("Error al cargar los usuarios: " + e.getMessage());
+            System.err.println("Error crítico al cargar el registro de usuarios: " + e.getMessage());
         }
         return usuarios;
     }
@@ -60,12 +62,13 @@ public class UsuarioRepository {
     public void save(List<UsuarioModel> usuarios) {
         try (PrintWriter pw = new PrintWriter(new FileWriter(filePath))) {
             for (UsuarioModel usuario : usuarios) {
-                pw.println(usuario.getIdUsuario() + ";" +
-                        usuario.getNombreCompleto() + ";" +
+                pw.printf("%s%s%s%s%s%n",
+                        usuario.getIdUsuario(), SEPARADOR,
+                        usuario.getNombreCompleto(), SEPARADOR,
                         usuario.getContrasena());
             }
         } catch (IOException e) {
-            System.err.println("Error al guardar los usuarios: " + e.getMessage());
+            System.err.println("Fallo al guardar el registro de usuarios: " + e.getMessage());
         }
     }
 }
