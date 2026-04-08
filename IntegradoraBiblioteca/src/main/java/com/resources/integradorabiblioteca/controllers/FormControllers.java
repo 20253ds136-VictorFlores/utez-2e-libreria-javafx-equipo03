@@ -7,10 +7,11 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 /**
- * Controlador del formulario de libros
- * Permite crear o editar registros
+ * Controlador de vista encargado de la captura de datos para la creacion
+ * o modificacion de las entidades Libro dentro del sistema.
  */
 public class FormControllers {
+
     @FXML private TextField txtIsbn, txtTitulo, txtAutor, txtAnio, txtGenero;
     @FXML private CheckBox chkDisponible;
 
@@ -19,41 +20,42 @@ public class FormControllers {
     private boolean modoEdicion = false;
 
     /**
-     * Inicializa datos del formulario
-     * @param service servicio de biblioteca
-     * @param libro libro a editar, null si es nuevo
-     * @param parentController controlador principal
+     * Vincula las dependencias operativas y, de ser necesario, pobla los campos con los datos del libro a editar.
+     * @param service Servicio que implementa la logica de negocio.
+     * @param libro Entidad Libro seleccionada; si es null, la vista operara en modo de creacion.
+     * @param parentController Referencia al controlador principal para forzar actualizaciones visuales.
      */
     public void inicializarDatos(LibraryService service, Libro libro, MainControllers parentController) {
         this.service = service;
         this.parentController = parentController;
 
         if (libro != null) {
-            modoEdicion = true;
-            txtIsbn.setText(libro.getIsbn());
-            txtIsbn.setDisable(true);
-            txtTitulo.setText(libro.getTitulo());
-            txtAutor.setText(libro.getAutor());
-            txtAnio.setText(String.valueOf(libro.getAnio()));
-            txtGenero.setText(libro.getGenero());
-            chkDisponible.setSelected(libro.isDisponible());
+            this.modoEdicion = true;
+            this.txtIsbn.setText(libro.getIsbn());
+            this.txtIsbn.setDisable(true);
+            this.txtTitulo.setText(libro.getTitulo());
+            this.txtAutor.setText(libro.getAutor());
+            this.txtAnio.setText(String.valueOf(libro.getAnio()));
+            this.txtGenero.setText(libro.getGenero());
+            this.chkDisponible.setSelected(libro.isDisponible());
         }
     }
 
     /**
-     * Accion para guardar libro nuevo o editado
+     * Captura la informacion del formulario, la ensambla en un objeto Libro y la envia al servicio.
+     * Administra el flujo dependiendo de si es un alta nueva o una actualizacion.
      */
     @FXML
     private void onSaveClick() {
         try {
-            String isbn = txtIsbn.getText();
-            String titulo = txtTitulo.getText();
-            String autor = txtAutor.getText();
-            String genero = txtGenero.getText();
-            boolean disponible = chkDisponible.isSelected();
-            int anio = Integer.parseInt(txtAnio.getText());
-
-            Libro libro = new Libro(isbn, titulo, autor, anio, genero, disponible);
+            Libro libro = new Libro(
+                    txtIsbn.getText(),
+                    txtTitulo.getText(),
+                    txtAutor.getText(),
+                    Integer.parseInt(txtAnio.getText()),
+                    txtGenero.getText(),
+                    chkDisponible.isSelected()
+            );
 
             if (modoEdicion) {
                 service.actualizarLibro(libro);
@@ -65,14 +67,14 @@ public class FormControllers {
             cerrarVentana();
 
         } catch (NumberFormatException e) {
-            mostrarError("Formato de año incorrecto. Ingrese un valor numerico.");
+            mostrarError("Formato de año incorrecto. Ingrese un valor numerico entero.");
         } catch (Exception e) {
             mostrarError(e.getMessage());
         }
     }
 
     /**
-     * Accion para cancelar y cerrar formulario
+     * Descarta los cambios actuales y finaliza el ciclo de vida de la ventana.
      */
     @FXML
     private void onCancelClick() {
@@ -80,16 +82,15 @@ public class FormControllers {
     }
 
     /**
-     * Cierra la ventana actual
+     * Libera los recursos visuales y oculta el escenario de la pantalla.
      */
     private void cerrarVentana() {
-        Stage stage = (Stage) txtIsbn.getScene().getWindow();
-        stage.close();
+        ((Stage) txtIsbn.getScene().getWindow()).close();
     }
 
     /**
-     * Muestra un mensaje de error
-     * @param mensaje texto del error
+     * Construye y expone una ventana emergente de tipo error al usuario en caso de excepciones.
+     * @param mensaje Descripcion tecnica o logica del problema ocurrido.
      */
     private void mostrarError(String mensaje) {
         Alert alerta = new Alert(Alert.AlertType.ERROR);

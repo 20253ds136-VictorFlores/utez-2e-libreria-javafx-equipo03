@@ -6,15 +6,16 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
 /**
- * Controlador de la vista de detalles
- * Muestra información de un libro seleccionado
+ * Controlador logico destinado puramente a proyectar atributos inmutables hacia controles de Label,
+ * en representacion de una ficha de solo-lectura sobre un libro especifico.
  */
 public class DetailControllers {
+
     @FXML private Label lblIsbn, lblTitulo, lblAutor, lblAnio, lblGenero, lblDisponible;
 
     /**
-     * Carga los datos del libro en la vista
-     * @param libro libro a mostrar
+     * Mapea y disemina los datos inyectados de la entidad a traves de la interfaz de la ventana.
+     * * @param libro Contexto base del cual se extraera la informacion a ser plasmada.
      */
     public void cargarDatos(Libro libro) {
         lblIsbn.setText(libro.getIsbn());
@@ -26,11 +27,10 @@ public class DetailControllers {
     }
 
     /**
-     * Accion para cerrar la ventana de detalles
+     * Detiene la proyeccion de la interfaz al solicitar el ocultamiento del Stage contenedor.
      */
     @FXML
     private void onBackClick() {
-        Stage stage = (Stage) lblIsbn.getScene().getWindow();
-        stage.close();
+        ((Stage) lblIsbn.getScene().getWindow()).close();
     }
 }

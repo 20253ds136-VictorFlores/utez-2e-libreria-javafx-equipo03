@@ -1,9 +1,10 @@
 package com.resources.integradorabiblioteca.model;
 
 /**
- * Modelo que representa un libro en el catalogo
+ * Entidad principal de dominio que estructura los datos basicos de un volumen literario.
  */
 public class Libro {
+
     private String isbn;
     private String titulo;
     private String autor;
@@ -12,13 +13,13 @@ public class Libro {
     private boolean disponible;
 
     /**
-     * Inicializa un libro con los datos dados.
-     * @param isbn codigo ISBN
-     * @param titulo titulo del libro
-     * @param autor autor del libro
-     * @param anio año de publicacion
-     * @param genero genero literario
-     * @param disponible disponibilidad en el catalogo
+     * Constructor general que instancia y asigna completamente el estado de un objeto Libro.
+     * @param isbn Cadena alfanumerica que funge como clave primaria del registro.
+     * @param titulo Nombre de la obra.
+     * @param autor Creador o escritor intelectual de la obra.
+     * @param anio Año de publicacion original (entero).
+     * @param genero Clasificacion tematica.
+     * @param disponible Estado booleano de inventario.
      */
     public Libro(String isbn, String titulo, String autor, int anio, String genero, boolean disponible) {
         this.isbn = isbn;
@@ -30,7 +31,7 @@ public class Libro {
     }
 
     /**
-     * Metodos de acceso (getters y setters)
+     * Metodos de acceso (getters and setters).
      */
     public String getIsbn() { return isbn; }
     public void setIsbn(String isbn) { this.isbn = isbn; }
@@ -46,8 +47,8 @@ public class Libro {
     public void setDisponible(boolean disponible) { this.disponible = disponible; }
 
     /**
-     * Devuelve los atributos del libro separados por comas.
-     * @return representacion en texto del libro
+     * Transforma el objeto actual a una estructura de texto estandarizada CSV separada por comas.
+     * @return Cadena que contiene los seis parametros del modelo unidos por comas.
      */
     @Override
     public String toString() {

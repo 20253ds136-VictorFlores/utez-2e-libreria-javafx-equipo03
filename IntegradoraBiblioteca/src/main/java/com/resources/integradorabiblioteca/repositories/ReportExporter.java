@@ -13,23 +13,21 @@ import java.util.List;
 public class ReportExporter {
 
     /**
-     * Genera un archivo CSV con los datos del catalogo
-     * @param listaLibros colección de libros a exportar
-     * @throws IOException si ocurre un error de escritura
+     * Convierte una coleccion especifica de libros y fabrica un documento tipo CSV dentro del directorio del usuario actual.
+     * * @param listaLibros Coleccion ya pre-filtrada o completa a vaciar en el archivo final.
+     * @throws IOException En caso de fallas de escritura de buffer en el directorio objetivo.
      */
     public void exportarCatalogo(List<Libro> listaLibros) throws IOException {
-        String carpetaUsuario = System.getProperty("user.home");
-        String rutaDescargas = carpetaUsuario + File.separator + "Downloads" + File.separator + "reporte_libros_disponibles.csv";
+        String rutaDescargas = System.getProperty("user.home") + File.separator + "Downloads" + File.separator + "reporte_libros_disponibles.csv";
 
-        BufferedWriter escritor = new BufferedWriter(new FileWriter(rutaDescargas));
-
-        escritor.write("ISBN,Titulo,Autor,Año,Genero,Disponible");
-        escritor.newLine();
-
-        for (Libro libro : listaLibros) {
-            escritor.write(libro.toString());
+        try (BufferedWriter escritor = new BufferedWriter(new FileWriter(rutaDescargas))) {
+            escritor.write("ISBN,Titulo,Autor,Año,Genero,Disponible");
             escritor.newLine();
+
+            for (Libro libro : listaLibros) {
+                escritor.write(libro.toString());
+                escritor.newLine();
+            }
         }
-        escritor.close();
     }
 }

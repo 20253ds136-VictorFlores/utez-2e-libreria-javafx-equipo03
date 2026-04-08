@@ -12,12 +12,16 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import java.util.function.Predicate;
 
 /**
- * Controlador principal de la interfaz
- * Gestiona tabla de libros y acciones de usuario
+ * Controlador que gestiona la cuadricula de datos de la interfaz grafica,
+ * procesando flujos de creacion, busqueda, edicion, y eliminacion de la coleccion principal.
  */
 public class MainControllers {
+
     @FXML private TableView<Libro> tableBooks;
     @FXML private TableColumn<Libro, String> colIsbn, colTitulo, colAutor, colGenero;
     @FXML private TableColumn<Libro, Integer> colAnio;
@@ -29,7 +33,8 @@ public class MainControllers {
     private FilteredList<Libro> listaFiltrada;
 
     /**
-     * Inicializa el controlador y carga datos
+     * Rutina principal de inicializacion de componentes inyectados por JavaFX.
+     * Enlaza el repositorio logico con los observadores de la interfaz.
      */
     @FXML
     public void initialize() {
@@ -37,15 +42,19 @@ public class MainControllers {
         configurarColumnas();
         listaObservable = FXCollections.observableArrayList(service.getCatalogo());
 
-        listaFiltrada = new FilteredList<>(listaObservable, b -> true);
+        listaFiltrada = new FilteredList<>(listaObservable, new Predicate<Libro>() {
+            @Override
+            public boolean test(Libro b) {
+                return true;
+            }
+        });
 
         tableBooks.setItems(listaFiltrada);
-
         configurarBuscador();
     }
 
     /**
-     * Configura las columnas de la tabla
+     * Mapea las propiedades de la clase Libro contra las celdas respectivas de TableColumn.
      */
     private void configurarColumnas() {
         colIsbn.setCellValueFactory(new PropertyValueFactory<>("isbn"));
@@ -57,14 +66,14 @@ public class MainControllers {
     }
 
     /**
-     * Refresca la tabla con el catalogo actual manteniendo el filtro
+     * Sincroniza la lista observable en memoria con el ultimo estado capturado desde el servicio logico.
      */
     public void actualizarTabla() {
         listaObservable.setAll(service.getCatalogo());
     }
 
     /**
-     * Accion para crear un nuevo registro
+     * Invoca el despliegue de la ventana de formulario en modo "Alta".
      */
     @FXML
     private void onNewClick() {
@@ -72,7 +81,7 @@ public class MainControllers {
     }
 
     /**
-     * Accion para editar un registro seleccionado
+     * Invoca el despliegue de la ventana de formulario inyectando la informacion del renglon actualmente remarcado en la tabla.
      */
     @FXML
     private void onEditClick() {
@@ -85,7 +94,8 @@ public class MainControllers {
     }
 
     /**
-     * Accion para eliminar un registro seleccionado con doble confirmacion
+     * Inicia un proceso de doble capa de seguridad para la supresion de registros,
+     * cargando un controlador externo para la primer capa.
      */
     @FXML
     private void onDeleteClick() {
@@ -106,9 +116,7 @@ public class MainControllers {
                 stage.setResizable(false);
                 stage.showAndWait();
 
-
                 if (controller.isConfirmado()) {
-
                     Alert confirmacionFinal = new Alert(Alert.AlertType.CONFIRMATION);
                     confirmacionFinal.setTitle("Confirmacion Final");
                     confirmacionFinal.setHeaderText("Accion irreversible");
@@ -121,7 +129,6 @@ public class MainControllers {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
                 mostrarAlerta("Error Critico", "No se pudo cargar la vista de confirmacion: " + e.getMessage());
             }
         } else {
@@ -130,7 +137,8 @@ public class MainControllers {
     }
 
     /**
-     * Accion para mostrar detalles de un registro.
+     * Genera un escenario detallado para el registro capturado,
+     * el cual opera estrictamente de forma visual (solo-lectura).
      */
     @FXML
     private void onDetailClick() {
@@ -148,13 +156,13 @@ public class MainControllers {
                 stage.setScene(new Scene(root));
                 stage.show();
             } catch (Exception e) {
-                e.printStackTrace();
+                mostrarAlerta("Error Critico", "Error al abrir detalles: " + e.getMessage());
             }
         }
     }
 
     /**
-     * Accion para exportar el catalogo a reporte.
+     * Llama al delegado de exportacion del servicio base.
      */
     @FXML
     private void onExportClick() {
@@ -167,8 +175,8 @@ public class MainControllers {
     }
 
     /**
-     * Abre formulario para crear o editar libro
-     * @param libro libro a editar, null si es nuevo
+     * Centraliza la instanciacion de la vista de formulario, compartiendo el contexto necesario de estado a traves de los modulos.
+     * @param libro Entidad a incrustar en el modo de edicion. De ser null el formulario abrira vacio.
      */
     private void abrirFormulario(Libro libro) {
         try {
@@ -183,14 +191,14 @@ public class MainControllers {
             stage.setScene(new Scene(root));
             stage.show();
         } catch (Exception e) {
-            e.printStackTrace();
+            mostrarAlerta("Error", "Fallo cargando vista de formulario: " + e.getMessage());
         }
     }
 
     /**
-     * Muestra una alerta informativa
-     * @param titulo  titulo de la ventana
-     * @param mensaje contenido del mensaje
+     * Construye y expone una ventana emergente de tipo informacion al usuario en el hilo visual.
+     * @param titulo Encabezado descriptivo de la ventana informativa.
+     * @param mensaje Cadena de texto correspondiente al cuerpo de la alerta.
      */
     private void mostrarAlerta(String titulo, String mensaje) {
         Alert alerta = new Alert(Alert.AlertType.INFORMATION);
@@ -201,23 +209,29 @@ public class MainControllers {
     }
 
     /**
-     * Configura el TextField para filtrar la tabla en tiempo real
+     * Vincula un Listener para recalcular el predicado de la lista filtrada de
+     * manera reactiva contra el campo de busqueda de texto.
      */
     private void configurarBuscador() {
-        txtBusqueda.textProperty().addListener((observable, oldValue, newValue) -> {
-            listaFiltrada.setPredicate(libro -> {
-                if (newValue == null || newValue.isEmpty()) {
-                    return true;
-                }
-                String filtroLowerCase = newValue.toLowerCase();
-
-                if (libro.getTitulo().toLowerCase().contains(filtroLowerCase)) {
-                    return true;
-                } else if (libro.getIsbn().toLowerCase().contains(filtroLowerCase)) {
-                    return true;
-                }
-                return false;
-            });
+        txtBusqueda.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                listaFiltrada.setPredicate(new Predicate<Libro>() {
+                    @Override
+                    public boolean test(Libro libro) {
+                        if (newValue == null || newValue.isEmpty()) {
+                            return true;
+                        }
+                        String filtroLowerCase = newValue.toLowerCase();
+                        if (libro.getTitulo().toLowerCase().contains(filtroLowerCase)) {
+                            return true;
+                        } else if (libro.getIsbn().toLowerCase().contains(filtroLowerCase)) {
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+            }
         });
     }
 }

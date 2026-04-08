@@ -6,8 +6,8 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 /**
- * Controlador para la ventana de confirmacion de eliminacion
- * Requiere que el usuario valide la accion reescribiendo o pegando el ISBN
+ * Controlador de la interfaz grafica para la validacion de eliminacion de registros.
+ * Exige la confirmacion manual del ISBN por parte del usuario para proceder.
  */
 public class DeleteConfirmControllers {
 
@@ -18,25 +18,25 @@ public class DeleteConfirmControllers {
     private boolean confirmado = false;
 
     /**
-     * Prepara la vista con el ISBN del libro seleccionado
-     * @param isbn Identificador unico que el usuario debe confirmar
+     * Inicializa la vista inyectando el ISBN del libro que se pretende eliminar.
+     * * @param isbn Identificador unico del libro seleccionado a eliminar.
      */
     public void inicializarDatos(String isbn) {
         this.isbnCorrecto = isbn;
-        txtIsbnTarget.setText(isbn);
+        this.txtIsbnTarget.setText(isbn);
     }
 
     /**
-     * Indica si el proceso de validacion fue exitoso
-     * @return true si el usuario confirmo correctamente, false en caso contrario
+     * Verifica el estado de la confirmacion de seguridad por parte del usuario.
+     * * @return true si el usuario ingreso el ISBN correctamente, false en caso contrario.
      */
     public boolean isConfirmado() {
         return confirmado;
     }
 
     /**
-     * Valida que el texto ingresado coincida con el ISBN objetivo
-     * Si es correcto, marca la confirmacion como exitosa y cierra la ventana
+     * Compara el valor ingresado por el usuario con el ISBN objetivo.
+     * Si la validacion es exitosa, actualiza la bandera de confirmacion y cierra la vista.
      */
     @FXML
     private void onConfirmarClick() {
@@ -56,7 +56,7 @@ public class DeleteConfirmControllers {
     }
 
     /**
-     * Cancela la operacion de eliminacion y cierra la ventana
+     * Interrumpe la operacion de eliminacion estableciendo un estado negativo y cerrando la vista.
      */
     @FXML
     private void onCancelarClick() {
@@ -65,17 +65,16 @@ public class DeleteConfirmControllers {
     }
 
     /**
-     * Obtiene el escenario actual y lo cierra
+     * Recupera el escenario actual a partir del contexto del componente y solicita su cierre.
      */
     private void cerrarVentana() {
-        Stage stage = (Stage) txtIsbnConfirm.getScene().getWindow();
-        stage.close();
+        ((Stage) txtIsbnConfirm.getScene().getWindow()).close();
     }
 
     /**
-     * Despliega una alerta de advertencia al usuario.
-     * @param titulo Encabezado de la ventana.
-     * @param mensaje Cuerpo del mensaje de error.
+     * Construye y expone una ventana emergente de tipo advertencia para notificar al usuario.
+     * @param titulo Titulo que se mostrara en la barra superior de la alerta.
+     * @param mensaje Detalle del error o advertencia dirigido al usuario.
      */
     private void mostrarAlerta(String titulo, String mensaje) {
         Alert alerta = new Alert(Alert.AlertType.WARNING);
