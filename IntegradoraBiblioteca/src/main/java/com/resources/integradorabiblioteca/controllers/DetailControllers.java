@@ -1,36 +1,83 @@
 package com.resources.integradorabiblioteca.controllers;
 
 import com.resources.integradorabiblioteca.model.Libro;
+import com.resources.integradorabiblioteca.services.ResenaService;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import java.util.List;
 
-/**
- * Controlador logico destinado puramente a proyectar atributos inmutables hacia controles de Label,
- * en representacion de una ficha de solo-lectura sobre un libro especifico.
- */
 public class DetailControllers {
 
     @FXML private Label lblIsbn, lblTitulo, lblAutor, lblAnio, lblGenero, lblDisponible;
+    @FXML private TextField txtNuevaEstrella, txtNuevaResena;
+    @FXML private TableView<ResenaRow> tableResenas;
+    @FXML private TableColumn<ResenaRow, String> colEstrellas, colComentario;
 
-    /**
-     * Mapea y disemina los datos inyectados de la entidad a traves de la interfaz de la ventana.
-     * * @param libro Contexto base del cual se extraera la informacion a ser plasmada.
-     */
-    public void cargarDatos(Libro libro) {
-        lblIsbn.setText(libro.getIsbn());
-        lblTitulo.setText(libro.getTitulo());
-        lblAutor.setText(libro.getAutor());
-        lblAnio.setText(String.valueOf(libro.getAnio()));
-        lblGenero.setText(libro.getGenero());
-        lblDisponible.setText(libro.isDisponible() ? "Si" : "No");
+    private Libro libroSeleccionado;
+    private ResenaService service;
+
+    @FXML
+    public void initialize() {
+        // Configura las columnas de la tabla
+        colEstrellas.setCellValueFactory(new PropertyValueFactory<>("estrellas"));
+        colComentario.setCellValueFactory(new PropertyValueFactory<>("comentario"));
     }
 
-    /**
-     * Detiene la proyeccion de la interfaz al solicitar el ocultamiento del Stage contenedor.
-     */
+    public void cargarDatos(Libro libro, ResenaService resenaService) {
+        this.libroSeleccionado = libro;
+        this.service = resenaService;
+
+        if (libro != null) {
+            lblIsbn.setText("ISBN: " + libro.getIsbn());
+            lblTitulo.setText("Título: " + libro.getTitulo());
+            lblAutor.setText("Autor: " + libro.getAutor());
+            lblAnio.setText("Año: " + libro.getAnio());
+            lblGenero.setText("Género: " + libro.getGenero());
+            lblDisponible.setText("Disponible: " + (libro.isDisponible() ? "Sí" : "No"));
+            actualizarTabla();
+        }
+    }
+
     @FXML
-    private void onBackClick() {
-        ((Stage) lblIsbn.getScene().getWindow()).close();
+    private void onPublicarClick() {
+        String estrellas = txtNuevaEstrella.getText().trim();
+        String comentario = txtNuevaResena.getText().trim();
+
+        if (!estrellas.isEmpty() && !comentario.isEmpty()) {
+            // Guardamos con formato "Estrellas|Comentario"
+            service.agregarResena(libroSeleccionado.getIsbn(), estrellas + "|" + comentario);
+            txtNuevaEstrella.clear();
+            txtNuevaResena.clear();
+            actualizarTabla();
+        }
+    }
+
+    private void actualizarTabla() {
+        List<String> raw = service.obtenerResenasPorIsbn(libroSeleccionado.getIsbn());
+        ObservableList<ResenaRow> data = FXCollections.observableArrayList();
+        for (String s : raw) {
+            String[] p = s.split("\\|");
+            data.add(new ResenaRow(p[0], p.length > 1 ? p[1] : ""));
+        }
+        tableResenas.setItems(data);
+    }
+
+    @FXML
+    private void onRegresarClick(ActionEvent event) {
+        Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
+        stage.close();
+    }
+
+    // Clase para representar una fila en la tabla
+    public static class ResenaRow {
+        private String estrellas, comentario;
+        public ResenaRow(String e, String c) { this.estrellas = e; this.comentario = c; }
+        public String getEstrellas() { return estrellas; }
+        public String getComentario() { return comentario; }
     }
 }
