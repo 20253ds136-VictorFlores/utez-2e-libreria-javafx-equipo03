@@ -1,102 +1,64 @@
 package com.resources.integradorabiblioteca.controllers;
 
-import com.resources.integradorabiblioteca.model.Libro;
+import com.resources.integradorabiblioteca.model.LibroModel;
 import com.resources.integradorabiblioteca.services.LibraryService;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
-/**
- * Controlador de vista encargado de la captura de datos para la creacion
- * o modificacion de las entidades Libro dentro del sistema.
- */
 public class FormControllers {
-
     @FXML private TextField txtIsbn, txtTitulo, txtAutor, txtAnio, txtGenero;
     @FXML private CheckBox chkDisponible;
 
     private LibraryService service;
-    private MainControllers parentController;
-    private boolean modoEdicion = false;
+    private MainControllers mainController; // Referencia a la pantalla principal
+    private LibroModel editando;
 
-    /**
-     * Vincula las dependencias operativas y, de ser necesario, pobla los campos con los datos del libro a editar.
-     * @param service Servicio que implementa la logica de negocio.
-     * @param libro Entidad Libro seleccionada; si es null, la vista operara en modo de creacion.
-     * @param parentController Referencia al controlador principal para forzar actualizaciones visuales.
-     */
-    public void inicializarDatos(LibraryService service, Libro libro, MainControllers parentController) {
-        this.service = service;
-        this.parentController = parentController;
+    public void setService(LibraryService s) { this.service = s; }
 
-        if (libro != null) {
-            this.modoEdicion = true;
-            this.txtIsbn.setText(libro.getIsbn());
-            this.txtIsbn.setDisable(true);
-            this.txtTitulo.setText(libro.getTitulo());
-            this.txtAutor.setText(libro.getAutor());
-            this.txtAnio.setText(String.valueOf(libro.getAnio()));
-            this.txtGenero.setText(libro.getGenero());
-            this.chkDisponible.setSelected(libro.isDisponible());
-        }
+    // ESTE ES EL MÉTODO QUE CAUSABA EL ERROR:
+    public void setMainController(MainControllers m) { this.mainController = m; }
+
+    public void cargarLibro(LibroModel l) {
+        this.editando = l;
+        txtIsbn.setText(l.getIsbn());
+        txtIsbn.setEditable(false);
+        txtTitulo.setText(l.getTitulo());
+        txtAutor.setText(l.getAutor());
+        txtAnio.setText(String.valueOf(l.getAnio()));
+        txtGenero.setText(l.getGenero());
+        chkDisponible.setSelected(l.isDisponible());
     }
 
-    /**
-     * Captura la informacion del formulario, la ensambla en un objeto Libro y la envia al servicio.
-     * Administra el flujo dependiendo de si es un alta nueva o una actualizacion.
-     */
     @FXML
-    private void onSaveClick() {
+    private void onGuardar() {
         try {
-            Libro libro = new Libro(
-                    txtIsbn.getText(),
-                    txtTitulo.getText(),
-                    txtAutor.getText(),
-                    Integer.parseInt(txtAnio.getText()),
-                    txtGenero.getText(),
-                    chkDisponible.isSelected()
-            );
+            String isbn = txtIsbn.getText();
+            String tit = txtTitulo.getText();
+            String aut = txtAutor.getText();
+            int anio = Integer.parseInt(txtAnio.getText());
+            String gen = txtGenero.getText();
+            boolean disp = chkDisponible.isSelected();
 
-            if (modoEdicion) {
-                service.actualizarLibro(libro);
+            if (editando == null) {
+                service.agregar(new LibroModel(isbn, tit, aut, anio, gen, disp));
             } else {
-                service.agregarLibro(libro);
+                editando.setTitulo(tit);
+                editando.setAutor(aut);
+                editando.setAnio(anio);
+                editando.setGenero(gen);
+                editando.setDisponible(disp);
+                service.actualizar(editando);
             }
 
-            parentController.actualizarTabla();
-            cerrarVentana();
+            // Refrescamos la tabla usando la referencia
+            if (mainController != null) mainController.refrescarTabla();
 
-        } catch (NumberFormatException e) {
-            mostrarError("Formato de año incorrecto. Ingrese un valor numerico entero.");
+            ((Stage) txtIsbn.getScene().getWindow()).close();
         } catch (Exception e) {
-            mostrarError(e.getMessage());
+            new Alert(Alert.AlertType.ERROR, e.getMessage()).show();
         }
     }
 
-    /**
-     * Descarta los cambios actuales y finaliza el ciclo de vida de la ventana.
-     */
-    @FXML
-    private void onCancelClick() {
-        cerrarVentana();
-    }
-
-    /**
-     * Libera los recursos visuales y oculta el escenario de la pantalla.
-     */
-    private void cerrarVentana() {
-        ((Stage) txtIsbn.getScene().getWindow()).close();
-    }
-
-    /**
-     * Construye y expone una ventana emergente de tipo error al usuario en caso de excepciones.
-     * @param mensaje Descripcion tecnica o logica del problema ocurrido.
-     */
-    private void mostrarError(String mensaje) {
-        Alert alerta = new Alert(Alert.AlertType.ERROR);
-        alerta.setTitle("Error de Validacion");
-        alerta.setHeaderText(null);
-        alerta.setContentText(mensaje);
-        alerta.showAndWait();
-    }
+    @FXML private void onCancelar() { ((Stage) txtIsbn.getScene().getWindow()).close(); }
 }
