@@ -43,7 +43,7 @@ public class FormControllers {
 
     /**
      * Captura la informacion del formulario, la ensambla en un objeto Libro y la envia al servicio.
-     * Administra el flujo dependiendo de si es un alta nueva o una actualizacion.
+     * Administra el flujo dependiendo de si es un alta nueva o una actualizacion
      */
     @FXML
     private void onSaveClick() {

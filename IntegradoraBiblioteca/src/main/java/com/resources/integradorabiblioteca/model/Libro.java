@@ -17,7 +17,7 @@ public class Libro {
      * @param isbn Cadena alfanumerica que funge como clave primaria del registro.
      * @param titulo Nombre de la obra.
      * @param autor Creador o escritor intelectual de la obra.
-     * @param anio Año de publicacion original (entero).
+     * @param anio Año de publicacion original (entero)
      * @param genero Clasificacion tematica.
      * @param disponible Estado booleano de inventario.
      */

@@ -14,7 +14,7 @@ public class ReportExporter {
 
     /**
      * Convierte una coleccion especifica de libros y fabrica un documento tipo CSV dentro del directorio del usuario actual.
-     * * @param listaLibros Coleccion ya pre-filtrada o completa a vaciar en el archivo final.
+     * @param listaLibros Coleccion ya pre-filtrada o completa a vaciar en el archivo final.
      * @throws IOException En caso de fallas de escritura de buffer en el directorio objetivo.
      */
     public void exportarCatalogo(List<Libro> listaLibros) throws IOException {

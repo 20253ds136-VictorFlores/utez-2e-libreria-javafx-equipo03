@@ -15,7 +15,7 @@ public class DetailControllers {
 
     /**
      * Mapea y disemina los datos inyectados de la entidad a traves de la interfaz de la ventana.
-     * * @param libro Contexto base del cual se extraera la informacion a ser plasmada.
+     * @param libro Contexto base del cual se extraera la informacion a ser plasmada.
      */
     public void cargarDatos(Libro libro) {
         lblIsbn.setText(libro.getIsbn());

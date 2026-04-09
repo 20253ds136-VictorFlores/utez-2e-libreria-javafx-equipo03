@@ -210,7 +210,7 @@ public class MainControllers {
 
     /**
      * Vincula un Listener para recalcular el predicado de la lista filtrada de
-     * manera reactiva contra el campo de busqueda de texto.
+     * manera reactiva contra el campo de busqueda de texto
      */
     private void configurarBuscador() {
         txtBusqueda.textProperty().addListener(new ChangeListener<String>() {

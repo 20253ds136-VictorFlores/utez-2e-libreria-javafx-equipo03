@@ -19,7 +19,7 @@ public class DeleteConfirmControllers {
 
     /**
      * Inicializa la vista inyectando el ISBN del libro que se pretende eliminar.
-     * * @param isbn Identificador unico del libro seleccionado a eliminar.
+     * @param isbn Identificador unico del libro seleccionado a eliminar.
      */
     public void inicializarDatos(String isbn) {
         this.isbnCorrecto = isbn;
@@ -28,7 +28,7 @@ public class DeleteConfirmControllers {
 
     /**
      * Verifica el estado de la confirmacion de seguridad por parte del usuario.
-     * * @return true si el usuario ingreso el ISBN correctamente, false en caso contrario.
+     * @return true si el usuario ingreso el ISBN correctamente, false en caso contrario.
      */
     public boolean isConfirmado() {
         return confirmado;
