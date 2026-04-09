@@ -19,9 +19,10 @@
         <TableView fx:id="tablaLibros">
             <columns>
                 <TableColumn fx:id="colIsbn" text="ISBN" prefWidth="100"/>
-                <TableColumn fx:id="colTitulo" text="Título" prefWidth="250"/>
+                <TableColumn fx:id="colTitulo" text="Titulo" prefWidth="250"/>
                 <TableColumn fx:id="colAutor" text="Autor" prefWidth="150"/>
                 <TableColumn fx:id="colAnio" text="Año" prefWidth="80"/>
+                <TableColumn fx:id="colDisponible" text="Estado" />
             </columns>
         </TableView>
     </center>

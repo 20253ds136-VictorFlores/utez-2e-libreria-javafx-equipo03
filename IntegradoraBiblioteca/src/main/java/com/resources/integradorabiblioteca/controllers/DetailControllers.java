@@ -6,120 +6,116 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
 import java.util.UUID;
 
 /**
- * Controlador de la vista expandida del sistema.
- * Esta clase se encarga de presentar la ficha técnica detallada de un libro
- * seleccionado y de gestionar el subsistema de valoraciones, actuando como
- * punto de unión entre la información estática del ejemplar y la dinámica
- * de los comentarios de los usuarios.
+ * Controlador de la vista de detalles de un libro.
+ * Muestra la informacion del ejemplar y gestiona la visualizacion y creacion de resenas.
  */
 public class DetailControllers {
 
-    // --- Componentes de la Ficha Técnica (Labels) ---
     @FXML private Label lblIsbn, lblTitulo, lblAutor, lblAnio, lblGenero, lblDisponible;
 
-    // --- Componentes del Módulo de Reseñas (UI) ---
     @FXML private TableView<ResenaModel> tablaResenas;
     @FXML private TableColumn<ResenaModel, Integer> colCalificacion;
     @FXML private TableColumn<ResenaModel, String> colComentario;
 
-    // --- Campos de entrada para nuevas reseñas ---
     @FXML private TextField txtCalificacion, txtComentario;
 
-    /** Instancia del servicio encargado de procesar la lógica de negocio de las opiniones. */
-    private ResenaService resService;
-
-    /** Referencia al modelo del libro en foco para establecer vínculos de datos. */
-    private LibroModel libro;
+    private ResenaService resenaService;
+    private LibroModel libroActual;
 
     /**
-     * Inicializa la vista con la información del libro y configura el entorno de reseñas.
-     * Este método inyecta las dependencias necesarias y puebla los campos visuales.
-     * * @param b  Objeto LibroModel que contiene la información a desplegar.
-     * @param rs Instancia de ResenaService para gestionar las consultas y registros.
+     * Inicializa la interfaz con los datos del libro y carga sus resenas correspondientes.
+     * @param libro Objeto con la informacion del libro a mostrar.
+     * @param resenaService Servicio para gestionar las consultas y registros de resenas.
      */
-    public void cargarDatos(LibroModel b, ResenaService rs) {
-        // Asignación de referencias locales.
-        this.libro = b;
-        this.resService = rs;
+    public void cargarDatos(LibroModel libro, ResenaService resenaService) {
+        this.libroActual = libro;
+        this.resenaService = resenaService;
 
-        // Poblamiento de etiquetas de texto a partir del modelo.
-        lblIsbn.setText(b.getIsbn());
-        lblTitulo.setText(b.getTitulo());
-        lblAutor.setText(b.getAutor());
-        lblAnio.setText(String.valueOf(b.getAnio()));
-        lblGenero.setText(b.getGenero());
-        lblDisponible.setText(b.isDisponible() ? "Disponible" : "No disponible");
+        lblIsbn.setText(libro.getIsbn());
+        lblTitulo.setText(libro.getTitulo());
+        lblAutor.setText(libro.getAutor());
+        lblAnio.setText(String.valueOf(libro.getAnio()));
+        lblGenero.setText(libro.getGenero());
+        lblDisponible.setText(libro.isDisponible() ? "Disponible" : "No disponible");
 
-        // Vinculación de las columnas de la tabla con los atributos de ResenaModel.
         colCalificacion.setCellValueFactory(new PropertyValueFactory<>("calificacion"));
         colComentario.setCellValueFactory(new PropertyValueFactory<>("comentario"));
 
-        // Carga inicial de comentarios existentes.
         refrescarResenas();
     }
 
     /**
-     * Orquestador del proceso de creación de una nueva valoración.
-     * Realiza la recolección de datos, genera una identidad única para el registro
-     * y solicita al servicio su incorporación al sistema.
+     * Captura los datos del formulario, los valida, crea una nueva resena con un ID unico
+     * y la guarda a traves del servicio.
      */
     @FXML
     private void onAgregarResena() {
         try {
-            /**
-             * Creación de un objeto de transferencia de datos (ResenaModel).
-             * Se genera un UUID aleatorio para asegurar la unicidad del ID de reseña.
-             * Se utiliza el ISBN del libro actual para establecer la relación lógica (FK).
-             */
+            String calificacionTexto = txtCalificacion.getText().trim();
+            String comentario = txtComentario.getText().trim();
+
+            if (calificacionTexto.isEmpty() || comentario.isEmpty()) {
+                mostrarAlerta("Campos Incompletos", "Por favor, ingresa una calificacion y un comentario.");
+                return;
+            }
+
+            int calificacion = Integer.parseInt(calificacionTexto);
+            if (calificacion < 1 || calificacion > 5) {
+                mostrarAlerta("Rango Invalido", "La calificacion debe ser un numero entre el 1 y el 5.");
+                return;
+            }
+
             ResenaModel nuevaResena = new ResenaModel(
-                    UUID.randomUUID().toString(), // Generación de ID Universal
-                    libro.getIsbn(),             // Vinculación por llave foránea
-                    Integer.parseInt(txtCalificacion.getText()), // Parseo de calificación
-                    txtComentario.getText()      // Captura del cuerpo del mensaje
+                    UUID.randomUUID().toString(),
+                    libroActual.getIsbn(),
+                    calificacion,
+                    comentario
             );
 
-            // Delegación de la persistencia a la capa de servicio.
-            resService.agregar(nuevaResena);
-
-            // Actualización inmediata de la tabla para reflejar el nuevo comentario.
+            resenaService.agregar(nuevaResena);
             refrescarResenas();
 
-            // Limpieza de campos de entrada para facilitar un nuevo registro.
             txtCalificacion.clear();
             txtComentario.clear();
 
         } catch (NumberFormatException e) {
-            // Manejo de errores en caso de que la calificación no sea un número entero.
-            new Alert(Alert.AlertType.WARNING, "La calificación debe ser un valor numérico.").show();
+            mostrarAlerta("Error de Formato", "La calificacion debe ser un numero entero (ejemplo: 4).");
         }
     }
 
     /**
-     * Sincroniza la tabla visual con el estado de la base de datos en memoria.
-     * Solicita al servicio solo aquellas reseñas asociadas al ISBN del libro actual.
+     * Sincroniza la tabla visual de resenas obteniendo la lista mas reciente desde el servicio.
      */
     private void refrescarResenas() {
-        if (resService != null && libro != null) {
-            /**
-             * El servicio devuelve una List filtrada manualmente.
-             * Se envuelve en una ObservableArrayList para que la tabla de JavaFX
-             * pueda procesar y mostrar los datos correctamente.
-             */
+        if (resenaService != null && libroActual != null) {
             tablaResenas.setItems(FXCollections.observableArrayList(
-                    resService.listarPorLibro(libro.getIsbn())
+                    resenaService.listarPorLibro(libroActual.getIsbn())
             ));
         }
     }
 
     /**
-     * Ejecuta el cierre controlado de la ventana de detalles.
-     * Recupera la escena y el escenario actual a través de la jerarquía de componentes.
+     * Cierra la ventana de detalles actual.
      */
     @FXML
     private void onRegresar() {
-        ((javafx.stage.Stage) lblIsbn.getScene().getWindow()).close();
+        Stage stage = (Stage) lblIsbn.getScene().getWindow();
+        stage.close();
+    }
+
+    /**
+     * Utilidad privada para generar ventanas emergentes de advertencia sin repetir codigo.
+     * @param titulo Encabezado de la alerta.
+     * @param mensaje Cuerpo del texto a mostrar al usuario.
+     */
+    private void mostrarAlerta(String titulo, String mensaje) {
+        Alert alerta = new Alert(Alert.AlertType.WARNING, mensaje);
+        alerta.setTitle(titulo);
+        alerta.setHeaderText(null);
+        alerta.show();
     }
 }

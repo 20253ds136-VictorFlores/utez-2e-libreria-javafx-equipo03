@@ -5,82 +5,71 @@ import java.io.*;
 import java.util.*;
 
 /**
- * Clase especializada en la gestión de persistencia para las reseñas de los libros.
- * Implementa la lógica necesaria para transformar objetos en memoria a registros
- * en un archivo de texto plano (.csv) y viceversa, permitiendo el almacenamiento
- * permanente de la información.
+ * Repositorio encargado de guardar y recuperar las resenas de los libros
+ * utilizando un archivo de texto plano (.csv) como base de datos local.
  */
 public class ResenaRepository {
 
-    /** Ruta específica del sistema de archivos donde se lee y escribe el archivo de datos. */
-    private final String RUTA;
+    private final String ruta;
 
     /**
-     * Constructor del repositorio.
-     * Define la ubicación física del archivo que servirá como base de datos.
-     * * @param ruta Ubicación del archivo (ej. "data/resenas.csv").
+     * Crea el repositorio asignando la ruta del archivo fisico.
+     * @param ruta Ubicacion del archivo (ej. "data/resenas.csv").
      */
     public ResenaRepository(String ruta) {
-        this.RUTA = ruta;
+        this.ruta = ruta;
     }
 
     /**
-     * Recupera el listado completo de reseñas desde el archivo físico.
-     * Procesa el archivo línea por línea y reconstruye los objetos ResenaModel.
-     * * @return Una lista {@code ArrayList} con las reseñas recuperadas.
-     * Si el archivo no existe, devuelve una lista vacía para no romper el flujo.
+     * Lee el archivo fisico y recupera todas las resenas guardadas.
+     * Si el archivo no existe, retorna una lista vacia para evitar interrupciones.
+     * @return Lista con los objetos ResenaModel procesados.
      */
     public List<ResenaModel> load() {
-        List<ResenaModel> lista = new ArrayList<>();
-        File f = new File(RUTA);
+        List<ResenaModel> listaResenas = new ArrayList<>();
+        File archivo = new File(ruta);
 
-        // Verificación preventiva para evitar errores de "Archivo no encontrado".
-        if (!f.exists()) return lista;
+        if (!archivo.exists()) {
+            return listaResenas;
+        }
 
-        // Se utiliza try-with-resources para asegurar que el archivo se cierre automáticamente.
-        try (BufferedReader br = new BufferedReader(new FileReader(f))) {
-            String l;
-            // Lectura secuencial hasta llegar al final del documento.
-            while ((l = br.readLine()) != null) {
-                // Se divide la línea de texto en un arreglo usando el punto y coma como separador.
-                String[] d = l.split(";");
+        try (BufferedReader lector = new BufferedReader(new FileReader(archivo))) {
+            String linea;
 
-                // Validación de integridad: se asegura de que la línea tenga las 4 columnas requeridas.
-                if (d.length >= 4) {
-                    // Reconstrucción del objeto a partir de los fragmentos de texto.
-                    lista.add(new ResenaModel(
-                            d[0],                   // ID de la reseña
-                            d[1],                   // ISBN del libro asociado
-                            Integer.parseInt(d[2]), // Conversión de texto a valor numérico
-                            d[3]                    // Texto del comentario
+            while ((linea = lector.readLine()) != null) {
+                String[] datos = linea.split(";");
+
+                if (datos.length >= 4) {
+                    listaResenas.add(new ResenaModel(
+                            datos[0],
+                            datos[1],
+                            Integer.parseInt(datos[2]),
+                            datos[3]
                     ));
                 }
             }
         } catch (Exception e) {
-            // Registro de incidentes en la consola para depuración técnica.
             e.printStackTrace();
         }
-        return lista;
+
+        return listaResenas;
     }
 
     /**
-     * Serializa y guarda la lista completa de reseñas en el almacenamiento físico.
-     * Este método sobrescribe el archivo existente para reflejar el estado más actual.
-     * * @param lista La colección de objetos ResenaModel que se desea persistir.
+     * Sobrescribe el archivo fisico con la lista actual de resenas para mantenerlas sincronizadas.
+     * @param listaResenas Coleccion de resenas a guardar.
      */
-    public void save(List<ResenaModel> lista) {
-        // Se abre el flujo de escritura. PrintWriter facilita la creación de líneas de texto.
-        try (PrintWriter pw = new PrintWriter(new FileWriter(RUTA))) {
-            // Recorrido de la lista para transformar cada objeto en una cadena formateada.
-            for (ResenaModel r : lista) {
-                // Construcción de la línea CSV concatenando atributos con el delimitador ';'.
-                pw.println(r.getIdResena() + ";" +
-                        r.getIsbnLibro() + ";" +
-                        r.getCalificacion() + ";" +
-                        r.getComentario());
+    public void save(List<ResenaModel> listaResenas) {
+        try (PrintWriter escritor = new PrintWriter(new FileWriter(ruta))) {
+
+            for (ResenaModel resena : listaResenas) {
+                escritor.println(resena.getIdResena() + ";" +
+                        resena.getIsbnLibro() + ";" +
+                        resena.getCalificacion() + ";" +
+                        resena.getComentario());
             }
+
         } catch (Exception e) {
-            // Captura de errores de Entrada/Salida (I/O) durante la escritura.
             e.printStackTrace();
         }
     }

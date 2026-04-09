@@ -13,75 +13,63 @@ import javafx.stage.*;
 import java.util.function.Predicate;
 
 /**
- * Controlador principal de la aplicación.
- * Gestiona la pantalla de inicio, el catálogo visual de libros y la
- * coordinación de eventos para la navegación hacia módulos secundarios.
+ * Controlador principal de la interfaz.
+ * Gestiona la tabla de libros, las busquedas y la coordinacion entre ventanas.
  */
 public class MainControllers {
 
-    // --- Componentes vinculados al archivo FXML ---
     @FXML private TableView<LibroModel> tablaLibros;
     @FXML private TextField txtBusqueda;
     @FXML private TableColumn<LibroModel, String> colIsbn, colTitulo, colAutor;
     @FXML private TableColumn<LibroModel, Integer> colAnio;
+    @FXML private TableColumn<LibroModel, Boolean> colDisponible;
 
-    // --- Dependencias de la lógica de negocio ---
     private LibraryService libService;
     private ResenaService resService;
 
-    /** Lista observable que actúa como puente directo entre la memoria y la tabla visual. */
     private ObservableList<LibroModel> masterData = FXCollections.observableArrayList();
 
     /**
-     * Inicializa la configuración de la tabla y establece los servicios.
-     * Configura el filtrado reactivo de búsqueda utilizando clases anónimas.
-     * * @param ls Servicio para la gestión de libros.
-     * @param rs Servicio para la gestión de reseñas.
+     * Configura los servicios y establece la logica de las columnas y el filtro de busqueda.
+     * @param libraryService Servicio para la gestion de libros.
+     * @param resenaService Servicio para la gestion de resenas.
      */
-    public void setServicios(LibraryService ls, ResenaService rs) {
-        this.libService = ls;
-        this.resService = rs;
+    public void setServicios(LibraryService libraryService, ResenaService resenaService) {
+        this.libService = libraryService;
+        this.resService = resenaService;
 
-        // Vinculación de columnas: conecta los atributos de LibroModel con la TableView.
         colIsbn.setCellValueFactory(new PropertyValueFactory<>("isbn"));
         colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
         colAutor.setCellValueFactory(new PropertyValueFactory<>("autor"));
         colAnio.setCellValueFactory(new PropertyValueFactory<>("anio"));
+        colDisponible.setCellValueFactory(new PropertyValueFactory<>("disponible"));
 
-        /**
-         * Implementación de Búsqueda Reactiva:
-         * Se crea una FilteredList que envuelve a la lista maestra.
-         */
         FilteredList<LibroModel> filteredData = new FilteredList<>(masterData, null);
 
-        // Agregamos un escucha al campo de texto mediante una Clase Anónima.
         txtBusqueda.textProperty().addListener(new javafx.beans.value.ChangeListener<String>() {
             @Override
-            public void changed(javafx.beans.value.ObservableValue<? extends String> obs, String old, String val) {
-                // Definimos la regla de filtrado mediante otra Clase Anónima (Predicate).
+            public void changed(javafx.beans.value.ObservableValue<? extends String> observable, String valorAnterior, String valorNuevo) {
                 filteredData.setPredicate(new Predicate<LibroModel>() {
                     @Override
                     public boolean test(LibroModel libro) {
-                        // Si el buscador está vacío, se muestran todos los libros.
-                        if (val == null || val.isEmpty()) return true;
+                        if (valorNuevo == null || valorNuevo.isEmpty()) {
+                            return true;
+                        }
 
-                        String f = val.toLowerCase();
-                        // El libro se muestra si el título o el ISBN coinciden con la búsqueda.
-                        return libro.getTitulo().toLowerCase().contains(f) ||
-                                libro.getIsbn().contains(f);
+                        String filtroLowerCase = valorNuevo.toLowerCase();
+                        return libro.getTitulo().toLowerCase().contains(filtroLowerCase) ||
+                                libro.getIsbn().toLowerCase().contains(filtroLowerCase);
                     }
                 });
             }
         });
 
-        // Se asigna la lista filtrada a la tabla para que responda a las búsquedas.
         tablaLibros.setItems(filteredData);
         refrescarTabla();
     }
 
     /**
-     * Sincroniza el contenido de la tabla con los datos actuales del servicio.
-     * Limpia la lista observable y la vuelve a poblar con el inventario actualizado.
+     * Actualiza la lista de la tabla con los datos mas recientes del servicio.
      */
     public void refrescarTabla() {
         if (libService != null) {
@@ -90,21 +78,22 @@ public class MainControllers {
     }
 
     /**
-     * Dispara la lógica de generación de reportes externos.
-     * Muestra alertas visuales de éxito o error según el resultado del proceso.
+     * Genera el reporte de inventario en formato de texto.
      */
     @FXML
     private void onExportarReporte() {
         try {
             libService.generarReporte();
-            new Alert(Alert.AlertType.INFORMATION, "Reporte generado en Descargas.").show();
+            Alert alertaExito = new Alert(Alert.AlertType.INFORMATION, "Reporte generado en Descargas.");
+            alertaExito.show();
         } catch (Exception e) {
-            new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).show();
+            Alert alertaError = new Alert(Alert.AlertType.ERROR, "Error al exportar: " + e.getMessage());
+            alertaError.show();
         }
     }
 
     /**
-     * Prepara la apertura del formulario en modo "Creación".
+     * Abre el formulario para registrar un nuevo libro.
      */
     @FXML
     private void onNuevo() {
@@ -112,49 +101,98 @@ public class MainControllers {
     }
 
     /**
-     * Obtiene el libro seleccionado en la tabla y abre la vista de detalles.
-     * Envía la referencia del libro y el servicio de reseñas a la nueva ventana.
+     * Muestra la informacion detallada y las resenas del libro seleccionado.
      */
     @FXML
     private void onVerDetalle() {
-        LibroModel sel = tablaLibros.getSelectionModel().getSelectedItem();
-        if (sel != null) {
+        LibroModel libroSeleccionado = tablaLibros.getSelectionModel().getSelectedItem();
+        if (libroSeleccionado != null) {
             try {
-                FXMLLoader l = new FXMLLoader(getClass().getResource("/com/resources/integradorabiblioteca/detail-view.fxml"));
-                Stage st = new Stage();
-                st.setTitle("Detalles");
-                st.setScene(new Scene(l.load()));
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/resources/integradorabiblioteca/detail-view.fxml"));
+                Parent root = fxmlLoader.load();
 
-                // Inyección de datos y servicios en el controlador de destino.
-                ((DetailControllers)l.getController()).cargarDatos(sel, resService);
-                st.show();
-            } catch (Exception e) { e.printStackTrace(); }
+                Stage stage = new Stage();
+                stage.setTitle("Detalles del Registro");
+                stage.setScene(new Scene(root));
+
+                DetailControllers controladorDetalle = fxmlLoader.getController();
+                controladorDetalle.cargarDatos(libroSeleccionado, resService);
+
+                stage.show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
     /**
-     * Método genérico para la apertura de ventanas secundarias.
-     * Centraliza la lógica de carga de FXML y configuración de controladores.
-     * * @param fxml   Ruta del recurso de vista.
-     * @param titulo Texto para la barra superior de la ventana.
-     * @param libro  Instancia de libro (opcional) en caso de edición.
+     * Carga el formulario con los datos del libro para su modificacion.
      */
-    private void abrirVentana(String fxml, String titulo, LibroModel libro) {
+    @FXML
+    private void onEditar() {
+        LibroModel libroSeleccionado = tablaLibros.getSelectionModel().getSelectedItem();
+        if (libroSeleccionado != null) {
+            abrirVentana("/com/resources/integradorabiblioteca/form-view.fxml", "Modificar Registro", libroSeleccionado);
+        } else {
+            Alert alerta = new Alert(Alert.AlertType.WARNING, "Seleccione un registro para editar.");
+            alerta.show();
+        }
+    }
+
+    /**
+     * Lanza el proceso de confirmacion de seguridad antes de eliminar un libro.
+     */
+    @FXML
+    private void onEliminar() {
+        LibroModel libroSeleccionado = tablaLibros.getSelectionModel().getSelectedItem();
+        if (libroSeleccionado != null) {
+            try {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/resources/integradorabiblioteca/delete-confirm-view.fxml"));
+                Parent root = fxmlLoader.load();
+
+                DeleteConfirmControllers controladorConfirmacion = fxmlLoader.getController();
+                controladorConfirmacion.inicializarDatos(libroSeleccionado.getIsbn());
+
+                Stage stage = new Stage();
+                stage.setTitle("Verificacion");
+                stage.initModality(Modality.APPLICATION_MODAL);
+                stage.setScene(new Scene(root));
+                stage.showAndWait();
+
+                if (controladorConfirmacion.isConfirmado()) {
+                    libService.eliminar(libroSeleccionado.getIsbn());
+                    refrescarTabla();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Metodo generico para la apertura de modales de formulario.
+     */
+    private void abrirVentana(String rutaFxml, String titulo, LibroModel libro) {
         try {
-            FXMLLoader l = new FXMLLoader(getClass().getResource(fxml));
-            Stage st = new Stage();
-            st.setTitle(titulo);
-            st.setScene(new Scene(l.load()));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(rutaFxml));
+            Parent root = fxmlLoader.load();
 
-            // Configuración inicial del controlador de la nueva ventana.
-            FormControllers c = l.getController();
-            c.setService(libService);
-            c.setMainController(this);
+            Stage stage = new Stage();
+            stage.setTitle(titulo);
+            stage.setScene(new Scene(root));
 
-            if (libro != null) c.cargarLibro(libro);
+            FormControllers controladorFormulario = fxmlLoader.getController();
+            controladorFormulario.setService(libService);
+            controladorFormulario.setMainController(this);
 
-            st.initModality(Modality.APPLICATION_MODAL);
-            st.show();
-        } catch (Exception e) { e.printStackTrace(); }
+            if (libro != null) {
+                controladorFormulario.cargarLibro(libro);
+            }
+
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
