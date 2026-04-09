@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.resources.integradorabiblioteca.controllers.MainControllers">
+    <top>
+        <VBox spacing="10">
+            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+            <Label text="Biblioteca Integrada" style="-fx-font-size: 20; -fx-font-weight: bold;"/>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Buscar libro:"/>
+                <TextField fx:id="txtBusqueda" promptText="ISBN o Título..." HBox.hgrow="ALWAYS"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <TableView fx:id="tablaLibros">
+            <columns>
+                <TableColumn fx:id="colIsbn" text="ISBN" prefWidth="100"/>
+                <TableColumn fx:id="colTitulo" text="Titulo" prefWidth="250"/>
+                <TableColumn fx:id="colAutor" text="Autor" prefWidth="150"/>
+                <TableColumn fx:id="colAnio" text="Año" prefWidth="80"/>
+                <TableColumn fx:id="colDisponible" text="Estado" />
+            </columns>
+        </TableView>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" alignment="CENTER">
+            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+            <Button text="Nuevo" onAction="#onNuevo" prefWidth="100"/>
+            <Button text="Editar" onAction="#onEditar" prefWidth="100"/>
+            <Button text="Eliminar" onAction="#onEliminar" prefWidth="100"/>
+            <Button text="Detalles" onAction="#onVerDetalle" prefWidth="100"/>
+            <Button text="Exportar" onAction="#onExportarReporte" prefWidth="100"/>
+        </HBox>
+    </bottom>
+</BorderPane>

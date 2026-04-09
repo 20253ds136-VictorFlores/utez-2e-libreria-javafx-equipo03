@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="15" alignment="CENTER" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.resources.integradorabiblioteca.controllers.DeleteConfirmControllers"
+      style="-fx-padding: 20;">
+
+    <Label text="Confirmación de Seguridad" style="-fx-font-weight: bold;"/>
+    <Label text="Escriba el ISBN del libro para confirmar la eliminación:"/>
+
+    <TextField fx:id="txtIsbnTarget" editable="false" style="-fx-background-color: #eee;"/>
+    <TextField fx:id="txtIsbnConfirm" promptText="Confirmar ISBN aquí..."/>
+
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="Cancelar" onAction="#onCancelarClick"/>
+        <Button text="CONFIRMAR" onAction="#onConfirmarClick" style=" -fx-text-fill: red;"/>
+    </HBox>
+</VBox>

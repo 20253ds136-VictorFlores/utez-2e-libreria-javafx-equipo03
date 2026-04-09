@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.resources.integradorabiblioteca.controllers.DetailControllers"
+      spacing="15" prefWidth="500" prefHeight="600" style="-fx-background-color: white;">
+
+    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+    <Label text="Ficha Técnica del Libro" style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+    <GridPane hgap="15" vgap="8">
+        <Label text="ISBN:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <Label fx:id="lblIsbn" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <Label text="Título:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <Label fx:id="lblTitulo" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+        <Label text="Autor:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <Label fx:id="lblAutor" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+        <Label text="Año:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <Label fx:id="lblAnio" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+        <Label text="Género:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <Label fx:id="lblGenero" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+        <Label text="Estado:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-font-weight: bold;"/>
+        <Label fx:id="lblDisponible" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <Separator/>
+
+    <Label text="Reseñas de Usuarios" style="-fx-font-size: 16; -fx-font-weight: bold;"/>
+
+    <TableView fx:id="tablaResenas" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colCalificacion" text="Puntos" prefWidth="70"/>
+            <TableColumn fx:id="colComentario" text="Comentario" prefWidth="380"/>
+        </columns>
+    </TableView>
+
+    <VBox spacing="10" style="-fx-background-color: #f9f9f9; -fx-padding: 10; -fx-border-color: #ddd;">
+        <Label text="Añadir mi reseña:" style="-fx-font-weight: bold;"/>
+        <HBox spacing="10">
+            <TextField fx:id="txtCalificacion" promptText="1-5" prefWidth="60"/>
+            <TextField fx:id="txtComentario" promptText="Escribe tu opinión aquí..." HBox.hgrow="ALWAYS"/>
+            <Button text="Publicar" onAction="#onAgregarResena" style="-fx-background-color: #27ae60; -fx-text-fill: white;"/>
+        </HBox>
+    </VBox>
+
+    <Button text="Regresar al Catálogo" onAction="#onRegresar" maxWidth="Infinity" style="-fx-padding: 10;"/>
+</VBox>
