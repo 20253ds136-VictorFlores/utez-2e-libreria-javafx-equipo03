@@ -3,28 +3,28 @@ package com.resources.integradorabiblioteca.services;
 import com.resources.integradorabiblioteca.model.LibroModel;
 import com.resources.integradorabiblioteca.repositories.*;
 import java.util.*;
-import java.time.Year;
 
 /**
- * Servicio encargado de gestionar las reglas de integridad del catálogo.
- * Incluye validaciones estructurales y de negocio, como la verificación
- * de títulos y códigos ISBN duplicados.
+ * Servicio de lógica de negocio encargado de gestionar el inventario de la biblioteca.
+ * Implementación estructurada con un enfoque tradicional (sin uso de lambdas o streams)
+ * para el manejo de colecciones y validaciones.
  */
 public class LibraryService {
+
     private final FileRepository repo;
     private final ReportExporter exporter;
-    private final List<LibroModel> cache;
+    private final List<LibroModel> inventario;
 
     /**
      * Constructor de la clase. Inicializa las dependencias y carga
-     * el inventario en memoria.
+     * el inventario en memoria desde el repositorio físico.
      *
-     * @param r Repositorio para la persistencia física de los libros.
+     * @param repo Repositorio para la persistencia de los libros.
      */
-    public LibraryService(FileRepository r) {
-        this.repo = r;
+    public LibraryService(FileRepository repo) {
+        this.repo = repo;
         this.exporter = new ReportExporter();
-        this.cache = r.load();
+        this.inventario = repo.load();
     }
 
     /**
@@ -33,77 +33,83 @@ public class LibraryService {
      * @return Lista de objetos LibroModel en memoria.
      */
     public List<LibroModel> listar() {
-        return cache;
+        return inventario;
     }
 
     /**
-     * Registra un nuevo libro en el sistema validando previamente sus datos.
-     *
-     * @param l El objeto LibroModel a agregar.
-     * @throws Exception Si los datos no cumplen con las reglas de negocio.
-     */
-    public void agregar(LibroModel l) throws Exception {
-        validar(l, true);
-        cache.add(l);
-        repo.save(cache);
-    }
-
-    /**
-     * Actualiza un registro existente aplicando las validaciones pertinentes.
+     * Guarda los cambios de un libro que ya existe en la colección.
+     * Al ser una referencia en memoria, los cambios de los atributos ya están
+     * reflejados; este método valida la integridad y persiste el estado actual.
      *
      * @param l El objeto LibroModel modificado.
      * @throws Exception Si los datos actualizados son inválidos.
      */
     public void actualizar(LibroModel l) throws Exception {
         validar(l, false);
-        repo.save(cache);
+        repo.save(inventario);
     }
 
     /**
-     * Valida que el libro cumpla con las normas estipuladas por la biblioteca.
+     * Registra un nuevo libro en el sistema validando previamente sus datos
+     * y asegurando que no existan colisiones en el inventario.
      *
-     * @param l     El objeto LibroModel a evaluar.
-     * @param nuevo Indica si es un registro nuevo (true) para aplicar validaciones
-     * de unicidad, o una actualización (false) para omitirlas.
-     * @throws Exception Si falta información obligatoria, el año es superior al actual,
-     * o si existe colisión de datos (ISBN o Título duplicados).
+     * @param l El objeto LibroModel a agregar.
+     * @throws Exception Si los datos no cumplen con las reglas de negocio.
      */
-    private void validar(LibroModel l, boolean nuevo) throws Exception {
+    public void agregar(LibroModel l) throws Exception {
+        validar(l, true);
+        inventario.add(l);
+        repo.save(inventario);
+    }
+
+    /**
+     * Valida que el libro cumpla con las normas de captura estipuladas.
+     * Evalúa la presencia de datos obligatorios y previene la duplicidad de registros.
+     *
+     * @param l       El objeto LibroModel a evaluar.
+     * @param esNuevo Indicador para aplicar o no la validación de duplicidad (ISBN y Título).
+     * @throws Exception Si falta información o si se detecta un registro duplicado.
+     */
+    private void validar(LibroModel l, boolean esNuevo) throws Exception {
         if (l.getIsbn().isBlank() || l.getTitulo().isBlank()) {
-            throw new Exception("Todos los campos obligatorios deben estar llenos.");
+            throw new Exception("Error: Campos obligatorios vacíos.");
         }
 
-        if (l.getAnio() > Year.now().getValue()) {
-            throw new Exception("El año no puede ser mayor al actual.");
-        }
-
-        if (nuevo) {
-            boolean isbnExiste = cache.stream()
-                    .anyMatch(b -> b.getIsbn().equals(l.getIsbn()));
-            if (isbnExiste) throw new Exception("Error: El ISBN ya está registrado.");
-
-            boolean tituloExiste = cache.stream()
-                    .anyMatch(b -> b.getTitulo().equalsIgnoreCase(l.getTitulo()));
-            if (tituloExiste) throw new Exception("Error: Ya existe un libro con ese nombre en el sistema.");
+        if (esNuevo) {
+            for (LibroModel libro : inventario) {
+                if (libro.getIsbn().equals(l.getIsbn())) {
+                    throw new Exception("Error: El ISBN ya existe.");
+                }
+                if (libro.getTitulo().equalsIgnoreCase(l.getTitulo())) {
+                    throw new Exception("Error: Ya existe un libro con ese título.");
+                }
+            }
         }
     }
 
     /**
-     * Exporta el inventario actual a un reporte físico.
-     *
-     * @throws Exception Si ocurre un problema de entrada/salida durante la generación.
-     */
-    public void generarReporte() throws Exception {
-        exporter.exportar(cache);
-    }
-
-    /**
-     * Elimina un libro de la memoria y actualiza la persistencia física.
+     * Elimina un libro de la memoria recorriendo la colección de manera segura
+     * y actualiza la persistencia física.
      *
      * @param isbn Identificador único del libro a eliminar.
      */
     public void eliminar(String isbn) {
-        cache.removeIf(b -> b.getIsbn().equals(isbn));
-        repo.save(cache);
+        Iterator<LibroModel> it = inventario.iterator();
+        while (it.hasNext()) {
+            LibroModel l = it.next();
+            if (l.getIsbn().equals(isbn)) {
+                it.remove();
+            }
+        }
+        repo.save(inventario);
+    }
+
+    /**
+     * Exporta el inventario actual a un reporte físico utilizando el servicio externo.
+     *
+     * @throws Exception Si ocurre un problema durante la generación del archivo.
+     */
+    public void generarReporte() throws Exception {
+        exporter.exportar(inventario);
     }
 }
