@@ -5,25 +5,25 @@ import java.io.*;
 import java.util.*;
 
 /**
- * Repositorio encargado de leer y escribir la informacion de los libros
- * en un archivo de texto, simulando una base de datos local.
+ * Repositorio encargado de la persistencia de los libros en el almacenamiento local.
+ * Implementa la lectura y escritura de datos utilizando archivos de texto plano (.csv).
  */
 public class FileRepository {
 
     private final String ruta;
 
     /**
-     * Crea el repositorio asignando la ruta del archivo fisico a utilizar.
-     * @param ruta Direccion del archivo de datos ("data/books.csv").
+     * Inicializa el repositorio con la ruta del archivo que funcionara como base de datos.
+     * @param ruta Ubicacion fisica del archivo ("data/libros.csv").
      */
     public FileRepository(String ruta) {
-        this.ruta = ruta;
+        this.ruta = ruta ;
     }
 
     /**
-     * Lee el archivo fisico y convierte cada linea en un objeto LibroModel.
-     * Si el archivo no existe, retorna una lista vacia para evitar interrupciones.
-     * @return Lista con todos los libros procesados.
+     * Recupera la coleccion completa de libros desde el archivo en disco.
+     * Si el archivo no existe, devuelve una lista vacia para no interrumpir el flujo del sistema.
+     * @return Lista de objetos LibroModel reconstruidos desde el archivo.
      */
     public List<LibroModel> load() {
         List<LibroModel> listaLibros = new ArrayList<>();
@@ -58,14 +58,15 @@ public class FileRepository {
     }
 
     /**
-     * Toma la lista actual de libros y la guarda en el archivo de texto,
-     * sobrescribiendo la informacion anterior para mantenerla sincronizada.
-     * @param listaLibros Coleccion de libros que se desea guardar.
+     * Escribe la lista completa de libros en el archivo fisico.
+     * Este metodo sobrescribe el contenido previo para asegurar la integridad del inventario.
+     * @param listaLibros Coleccion de libros que se desea persistir.
      */
     public void save(List<LibroModel> listaLibros) {
         try (PrintWriter escritor = new PrintWriter(new FileWriter(ruta))) {
 
             for (LibroModel libro : listaLibros) {
+                // Se utiliza un formato estructurado para asegurar la consistencia del CSV
                 escritor.println(String.format("%s;%s;%s;%d;%s;%b",
                         libro.getIsbn(),
                         libro.getTitulo(),
@@ -74,6 +75,7 @@ public class FileRepository {
                         libro.getGenero(),
                         libro.isDisponible()));
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
