@@ -1,34 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.resources.integradorabiblioteca.controllers.MainControllers">
     <top>
-        <VBox spacing="10" style="-fx-padding: 15;">
+        <VBox spacing="10">
+            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
             <Label text="Biblioteca Integrada" style="-fx-font-size: 20; -fx-font-weight: bold;"/>
-            <TextField fx:id="txtBusqueda" promptText="Buscar por título o ISBN..."/>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Buscar libro:"/>
+                <TextField fx:id="txtBusqueda" promptText="ISBN o Título..." HBox.hgrow="ALWAYS"/>
+            </HBox>
         </VBox>
     </top>
+
     <center>
         <TableView fx:id="tablaLibros">
             <columns>
                 <TableColumn fx:id="colIsbn" text="ISBN" prefWidth="100"/>
-                <TableColumn fx:id="colTitulo" text="Título" prefWidth="200"/>
-                <TableColumn fx:id="colAutor" text="Autor" prefWidth="120"/>
-                <TableColumn fx:id="colAnio" text="Año" prefWidth="70"/>
-                <TableColumn fx:id="colGenero" text="Género" prefWidth="100"/>
-                <TableColumn fx:id="colDisponible" text="Disponible" prefWidth="80"/>
+                <TableColumn fx:id="colTitulo" text="Título" prefWidth="250"/>
+                <TableColumn fx:id="colAutor" text="Autor" prefWidth="150"/>
+                <TableColumn fx:id="colAnio" text="Año" prefWidth="80"/>
             </columns>
         </TableView>
     </center>
-    <bottom>
-        <HBox spacing="10" alignment="CENTER" style="-fx-padding: 15;">
-            <Button text="Nuevo" onAction="#onNuevo" style="-fx-background-color: #2ecc71; -fx-text-fill: white;"/>
-            <Button text="Editar" onAction="#onEditar"/>
-            <Button text="Eliminar" onAction="#onEliminar" style="-fx-text-fill: #e74c3c; -fx-text-fill: white;"/>
-            <Button text="Detalles" onAction="#onVerDetalle"/>
 
-            <Button text="Exportar" onAction="#onExportarReporte" style="-fx-background-color: #9b59b6; -fx-text-fill: white;"/>
+    <bottom>
+        <HBox spacing="10" alignment="CENTER">
+            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+            <Button text="Nuevo" onAction="#onNuevo" prefWidth="100"/>
+            <Button text="Editar" onAction="#onEditar" prefWidth="100"/>
+            <Button text="Eliminar" onAction="#onEliminar" prefWidth="100"/>
+            <Button text="Detalles" onAction="#onVerDetalle" prefWidth="100"/>
+            <Button text="Exportar" onAction="#onExportarReporte" prefWidth="100"/>
         </HBox>
     </bottom>
 </BorderPane>
