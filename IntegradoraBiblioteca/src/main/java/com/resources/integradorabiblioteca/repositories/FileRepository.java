@@ -66,7 +66,6 @@ public class FileRepository {
         try (PrintWriter escritor = new PrintWriter(new FileWriter(ruta))) {
 
             for (LibroModel libro : listaLibros) {
-                // Se utiliza un formato estructurado para asegurar la consistencia del CSV
                 escritor.println(String.format("%s;%s;%s;%d;%s;%b",
                         libro.getIsbn(),
                         libro.getTitulo(),

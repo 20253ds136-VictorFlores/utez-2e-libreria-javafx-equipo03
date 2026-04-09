@@ -25,7 +25,9 @@ public class ResenaModel {
         this.comentario = comentario;
     }
 
-    // --- Metodos de acceso ---
+    /**
+     *Metodos de acceso (Getters and Setters).
+     */
     public String getIdResena() {return idResena;}
     public String getIsbnLibro() {return isbnLibro;}
     public int getCalificacion() {return calificacion;}
