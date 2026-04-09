@@ -1,32 +1,32 @@
 package com.resources.integradorabiblioteca.model;
 
 /**
- * Clase de modelo que representa la entidad "Reseña" en el sistema.
- * Actúa como un contenedor de datos (Data Transfer Object) para transportar
- * la información de las valoraciones de los usuarios entre las capas de
- * persistencia, servicio e interfaz.
+ * Clase de modelo (POJO) que representa la entidad "Reseña" dentro del sistema.
+ * Esta clase funciona como un contenedor de datos (Data Transfer Object) diseñado
+ * para estandarizar la información de las valoraciones que los usuarios realizan
+ * sobre los libros del catálogo.
  */
 public class ResenaModel {
 
-    /** Identificador único universal (UUID) para distinguir cada reseña. */
+    /** Identificador único asignado a la reseña (generalmente un UUID). */
     private String idResena;
 
-    /** Referencia cruzada (Foreign Key) al ISBN del libro calificado. */
+    /** Código ISBN que vincula de manera lógica la reseña con un libro específico del inventario. */
     private String isbnLibro;
 
-    /** Valoración numérica otorgada por el usuario (usualmente en un rango de 1 a 5). */
+    /** Valor numérico que representa la satisfacción del usuario (escala de calificación). */
     private int calificacion;
 
-    /** Texto descriptivo que contiene la opinión o crítica del lector. */
+    /** Contenido textual que expresa la opinión o crítica del lector. */
     private String comentario;
 
     /**
-     * Constructor completo para la instanciación de una reseña.
-     *
-     * @param idResena     Identificador único de la transacción de reseña.
-     * @param isbnLibro    Código ISBN del libro al que pertenece el comentario.
-     * @param calificacion Puntaje numérico asignado.
-     * @param comentario   Contenido textual de la opinión.
+     * Constructor para la creación de una instancia completa de la reseña.
+     * Permite inicializar todos los atributos del objeto en el momento de su creación.
+     * * @param idResena     Clave única de la reseña.
+     * @param isbnLibro    Referencia al libro calificado.
+     * @param calificacion Valoración numérica.
+     * @param comentario   Texto de la opinión.
      */
     public ResenaModel(String idResena, String isbnLibro, int calificacion, String comentario) {
         this.idResena = idResena;
@@ -35,25 +35,29 @@ public class ResenaModel {
         this.comentario = comentario;
     }
 
-    /** * @return El identificador único de la reseña.
+    /** * Recupera el identificador único de la reseña.
+     * @return Cadena de texto con el ID.
      */
     public String getIdResena() {
         return idResena;
     }
 
-    /** * @return El ISBN del libro asociado a este comentario.
+    /** * Recupera el ISBN del libro al que hace referencia esta valoración.
+     * @return El código ISBN asociado.
      */
     public String getIsbnLibro() {
         return isbnLibro;
     }
 
-    /** * @return La calificación numérica (puntos/estrellas).
+    /** * Obtiene la calificación otorgada por el usuario.
+     * @return Valor entero de la calificación.
      */
     public int getCalificacion() {
         return calificacion;
     }
 
-    /** * @return El texto íntegro del comentario.
+    /** * Recupera el texto descriptivo del comentario.
+     * @return Cadena con la opinión del usuario.
      */
     public String getComentario() {
         return comentario;

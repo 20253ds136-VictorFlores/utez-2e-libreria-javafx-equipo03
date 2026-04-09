@@ -1,39 +1,41 @@
 package com.resources.integradorabiblioteca.model;
 
 /**
- * Entidad que representa un libro dentro del sistema.
- * Contiene la información técnica y el estado de circulación (disponibilidad)
- * para su gestión en el inventario.
+ * Entidad fundamental (POJO) que representa un libro en el sistema.
+ * Esta clase define la estructura de datos para el catálogo y permite
+ * el intercambio de información entre los formularios de edición y
+ * el almacenamiento persistente en el archivo CSV.
  */
 public class LibroModel {
 
-    /** Identificador único del libro (International Standard Book Number). */
+    /** Identificador único internacional del libro. Se usa como llave primaria. */
     private String isbn;
 
-    /** Título oficial de la obra literaria. */
+    /** Título completo de la obra. */
     private String titulo;
 
-    /** Nombre del autor o creador del libro. */
+    /** Nombre de la persona o entidad que escribió la obra. */
     private String autor;
 
-    /** Año de publicación de la edición registrada. */
+    /** Año en que se imprimió o registró la edición actual. */
     private int anio;
 
-    /** Categoría o género literario al que pertenece la obra. */
+    /** Clasificación temática del libro (ej. Novela, Terror, Ciencia Ficción). */
     private String genero;
 
-    /** Indicador del estado actual: verdadero si está en biblioteca, falso si está prestado. */
+    /** Atributo de estado: true si el ejemplar se encuentra en los estantes. */
     private boolean disponible;
 
     /**
-     * Constructor completo para inicializar todos los atributos de un libro.
-     *
-     * @param isbn       Código único de identificación.
-     * @param titulo     Nombre de la obra.
-     * @param autor      Escritor del libro.
-     * @param anio       Año en que fue publicado.
-     * @param genero     Clasificación literaria.
-     * @param disponible Estado físico en el inventario.
+     * Constructor maestro para la creación de instancias de libros.
+     * Se utiliza tanto al registrar libros nuevos como al reconstruir objetos
+     * leídos desde el repositorio físico.
+     * * @param isbn       Código identificador único.
+     * @param titulo     Nombre de la pieza literaria.
+     * @param autor      Responsable de la obra.
+     * @param anio       Año de publicación.
+     * @param genero     Categoría literaria.
+     * @param disponible Estado de circulación.
      */
     public LibroModel(String isbn, String titulo, String autor, int anio, String genero, boolean disponible) {
         this.isbn = isbn;
@@ -44,10 +46,13 @@ public class LibroModel {
         this.disponible = disponible;
     }
 
-    /** @return El código ISBN del libro. */
+    // --- Métodos de Acceso (Getters) ---
+    // Permiten que las tablas y el repositorio lean los datos del objeto.
+
+    /** @return El código ISBN. */
     public String getIsbn() { return isbn; }
 
-    /** @return El título de la obra. */
+    /** @return El título registrado. */
     public String getTitulo() { return titulo; }
 
     /** @return El nombre del autor. */
@@ -56,24 +61,27 @@ public class LibroModel {
     /** @return El año de publicación. */
     public int getAnio() { return anio; }
 
-    /** @return El género literario. */
+    /** @return El género del libro. */
     public String getGenero() { return genero; }
 
-    /** @return true si el libro está disponible para préstamo, false en caso contrario. */
+    /** @return Estado booleano de disponibilidad. */
     public boolean isDisponible() { return disponible; }
 
-    /** @param t El nuevo título a asignar. */
+    // --- Métodos de Modificación (Setters) ---
+    // Permiten que el formulario de edición actualice los valores del objeto en memoria.
+
+    /** @param t Actualiza el título del libro. */
     public void setTitulo(String t) { this.titulo = t; }
 
-    /** @param a El nuevo autor a asignar. */
+    /** @param a Actualiza el nombre del autor. */
     public void setAutor(String a) { this.autor = a; }
 
-    /** @param a El nuevo año de publicación a asignar. */
+    /** @param a Actualiza el año de publicación. */
     public void setAnio(int a) { this.anio = a; }
 
-    /** @param g El nuevo género a asignar. */
+    /** @param g Actualiza el género literario. */
     public void setGenero(String g) { this.genero = g; }
 
-    /** @param d El nuevo estado de disponibilidad. */
+    /** @param d Actualiza el estado de disponibilidad en el sistema. */
     public void setDisponible(boolean d) { this.disponible = d; }
 }
