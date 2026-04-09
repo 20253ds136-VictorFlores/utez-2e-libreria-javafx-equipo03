@@ -84,7 +84,7 @@ Sincronización: Cada cambio se guarda inmediatamente en los archivos .csv ubica
 Reporte de Inventario: Genera un archivo profesional llamado inventario_biblioteca.txt en la carpeta de Descargas del sistema, con estadísticas de disponibilidad y formato de tabla ASCII.
 
 ## 9. Datos de Prueba
-El sistema incluye el archivo libros.csv con 9 registros de prueba precargados. Estos datos permiten evaluar las funciones de búsqueda, filtrado y generación de reportes desde la primera ejecución.
+El sistema incluye el archivo libros.csv con 5 registros de prueba precargados. Estos datos permiten evaluar las funciones de búsqueda, filtrado y generación de reportes desde la primera ejecución.
 
 ## 10. Flujo de Ramas (Git Flow)
 Se ha implementado una estrategia de ramificación para asegurar la estabilidad del proyecto:
@@ -96,8 +96,3 @@ dev: Rama de integración de módulos finalizados.
 Ramas personales: Formato <usuario>/nombre-apellido para el desarrollo individual de componentes.
 
 Proceso: Rama Personal ➔ dev (Pruebas) ➔ main (Entrega Final).
-
-## 11. Equipo de Desarrollo
-Flores Villegas Victor Alexander
-
-Salgado Uresti Rene Alejandro
