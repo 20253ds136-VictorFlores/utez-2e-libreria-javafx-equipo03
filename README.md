@@ -33,38 +33,70 @@ Al ser un proyecto gestionado con Maven, la ejecución es directa desde el IDE. 
     - Haz clic derecho sobre el archivo y selecciona **Run 'Launcher.main()'**.
 
 ---
+## 4. Descripción General
+Este proyecto es una solución integral diseñada para la administración de acervos escolares. Permite gestionar de forma eficiente el inventario físico de libros y ofrece un sistema interactivo de reseñas y calificaciones. La aplicación se destaca por su arquitectura robusta y un enfoque preventivo en la seguridad y persistencia de los datos.
 
-## 3. Explicación de Persistencia y Exportación (Reglas de Negocio)
-
-### Persistencia en Archivo Local
-El sistema no utiliza bases de datos ni depende únicamente de la memoria RAM. Utiliza un repositorio basado en archivos de texto estructurado (`.csv`) ubicado en la ruta `data/books.csv`.
-* **Al iniciar la aplicación (Read):** El servicio lee el archivo línea por línea, separando los datos por comas, e instancia los objetos de tipo `Book` para mostrarlos en la tabla. Si el archivo no existe, el sistema lo crea automáticamente.
-* **Al modificar datos (Write):** Cada vez que se ejecuta una operación de Alta, Actualización o Eliminación, el sistema reescribe el archivo `books.csv` con la lista actualizada de la memoria. Esto garantiza que ante un cierre inesperado, el último estado de la tabla siempre esté guardado.
-
-### Exportación del Reporte
-Como funcionalidad extra, el sistema incluye un botón para generar un reporte del catálogo. Al accionarlo, el sistema toma la lista actual de libros y genera un nuevo archivo llamado `reporte_catalogo.csv` en la raíz del proyecto. Este archivo incluye encabezados de columna y puede ser abierto en software de hojas de cálculo (como Excel) para auditorías externas.
+## 5. Objetivo
+Desarrollar una aplicación de escritorio profesional utilizando **JavaFX 21**, bajo los siguientes pilares:
+* **Arquitectura de Capas:** Separación total de responsabilidades para un código escalable y mantenible.
+* **Programación Imperativa:** Implementación de lógica mediante estructuras tradicionales (Iteradores, Clases Anónimas, Bucles `for`) para un control explícito del flujo, sin uso de lambdas.
+* **Integridad de Datos:** Validación rigurosa de entradas y persistencia local sincronizada.
 
 ---
 
-## 4. Arquitectura de la Interfaz (JavaFX)
+## 6. Arquitectura y Lógica de Negocio
 
-La aplicación cuenta con 3 pantallas principales para separar las responsabilidades visuales:
+### Gestión de Inventario (CRUD)
+* **Alta y Edición:** Formulario dinámico con validación de campos. Durante la edición, se protege la integridad de la llave primaria (ISBN).
+* **Buscador Reactivo:** Filtro en tiempo real mediante `FilteredList` que responde a criterios de Título o ISBN conforme el usuario escribe.
+* **Borrado Seguro (Failsafe):** Mecanismo de validación que obliga al usuario a reescribir manualmente el ISBN para confirmar la eliminación de un registro.
 
-1. **Pantalla Principal (Catálogo):**
-    - Tabla interactiva con las columnas: ISBN/ID, Título, Autor, Año, Género y Disponibilidad.
-    - Botones de acción principales (Nuevo, Editar, Eliminar, Ver Detalle, Exportar Reporte).
-2. **Pantalla de Formulario (Altas y Ediciones):**
-    - Campos de texto y selección para capturar los datos del libro.
-    - Lógica compartida: se adapta dinámicamente si se va a registrar un nuevo libro o a editar uno existente (bloqueando la edición del ISBN).
-3. **Pantalla de Detalle:**
-    - Vista de solo lectura que muestra la información completa del registro seleccionado sin riesgo de modificación accidental.
+### Sistema de Reseñas
+* **Relación Lógica:** Implementación de un modelo relacional donde las reseñas se vinculan a los libros mediante el ISBN (Foreign Key).
+* **Identidad:** Generación de identificadores únicos universales (**UUID**) para cada valoración.
+
+### Reglas de Validación
+* **Unicidad:** Restricción de duplicados por ISBN y Título (case-insensitive).
+* **Tipado:** Manejo de excepciones para asegurar que el Año y la Calificación sean numéricos.
+* **Rango Cronológico:** Solo se permiten libros publicados entre **1450 y 2026**.
 
 ---
 
-## 5. Validaciones y Manejo de Errores
+## 7. Estructura del Proyecto
+Organización de archivos basada en el estándar de Maven:
 
-El sistema implementa manejo de excepciones (`try/catch`) y reglas de negocio obligatorias:
-- **Campos vacíos:** No se permite registrar ni actualizar si hay campos en blanco.
-- **Longitud de texto:** El título y el autor requieren un mínimo de 3 caracteres.
-- **Rango numérico:** El año de publicación debe ser un número entero válido comprendido entre el año 1500 y el año actual.
-- **Integridad de datos:** No se permite el registro de dos libros con el mismo ISBN/ID (validación de duplicidad).
+```text
+IntegradoraBiblioteca/
+├── data/                         # Almacenamiento físico (.csv)
+├── src/main/java/com.resources.integradorabiblioteca/
+│   ├── model/                    # Entidades de datos
+│   ├── repositories/             # Capa de persistencia (I/O)
+│   ├── services/                 # Lógica de negocio y validación
+│   ├── controllers/              # Controladores de la UI (FXML)
+│   ├── Launcher.java             # Clase de entrada auxiliar
+│   └── RunApplication.java       # Clase principal de JavaFX
+├── src/main/resources/           # Vistas (Archivos .fxml)
+└── module-info.java              # Configuración de módulos
+## 8. Persistencia y Reportes
+Sincronización: Cada cambio se guarda inmediatamente en los archivos .csv ubicados en la carpeta data/.
+
+Reporte de Inventario: Genera un archivo profesional llamado inventario_biblioteca.txt en la carpeta de Descargas del sistema, con estadísticas de disponibilidad y formato de tabla ASCII.
+
+## 9. Datos de Prueba
+El sistema incluye el archivo libros.csv con 9 registros de prueba precargados. Estos datos permiten evaluar las funciones de búsqueda, filtrado y generación de reportes desde la primera ejecución.
+
+## 10. Flujo de Ramas (Git Flow)
+Se ha implementado una estrategia de ramificación para asegurar la estabilidad del proyecto:
+
+main: Versión estable y lista para entrega.
+
+dev: Rama de integración de módulos finalizados.
+
+Ramas personales: Formato <usuario>/nombre-apellido para el desarrollo individual de componentes.
+
+Proceso: Rama Personal ➔ dev (Pruebas) ➔ main (Entrega Final).
+
+## 11. Equipo de Desarrollo
+Flores Villegas Victor Alexander
+
+Salgado Uresti Rene Alejandro
