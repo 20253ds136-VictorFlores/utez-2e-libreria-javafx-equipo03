@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Repositorio especializado en la persistencia de reseñas.
- * Gestiona el almacenamiento físico de las opiniones de los usuarios, manteniendo
- * la integridad de las relaciones entre libros y autores en formato CSV.
+ * Repositorio especializado en la persistencia de reseñas anónimas.
+ * Gestiona el almacenamiento físico en formato CSV. Se ha eliminado la
+ * referencia a usuarios para simplificar la arquitectura del sistema.
  */
 public class ResenaRepository {
 
@@ -25,7 +25,7 @@ public class ResenaRepository {
 
     /**
      * Recupera el histórico de reseñas desde el archivo local.
-     * Implementa un filtrado de líneas mal formadas para evitar excepciones en tiempo de ejecución.
+     * Procesa únicamente 4 columnas de datos: ID, ISBN, Calificación y Comentario.
      * @return Lista de objetos {@link ResenaModel}.
      */
     public List<ResenaModel> load() {
@@ -40,17 +40,18 @@ public class ResenaRepository {
                 if (line.isBlank()) continue;
 
                 String[] data = line.split(SEPARADOR);
-                if (data.length >= 5) {
+
+                // Cambio crítico: Ahora validamos 4 columnas (antes eran 5 con el usuario)
+                if (data.length >= 4) {
                     try {
                         resenas.add(new ResenaModel(
                                 data[0].trim(),                     // ID Reseña
                                 data[1].trim(),                     // ISBN Libro
-                                data[2].trim(),                     // ID Usuario
-                                Integer.parseInt(data[3].trim()),   // Calificación
-                                data[4].trim()                      // Comentario
+                                Integer.parseInt(data[2].trim()),   // Calificación
+                                data[3].trim()                      // Comentario
                         ));
                     } catch (NumberFormatException e) {
-                        System.err.println("Dato numérico inválido en reseña: " + line);
+                        System.err.println("Error de formato numérico en línea: " + line);
                     }
                 }
             }
@@ -61,16 +62,17 @@ public class ResenaRepository {
     }
 
     /**
-     * Persiste la colección completa de reseñas en el almacenamiento local.
-     * @param resenas Lista de reseñas a guardar.
+     * Persiste la colección de reseñas en el almacenamiento local.
+     * El formato de salida es: ID;ISBN;Calificación;Comentario
+     * @param resenas Lista de reseñas anónimas a guardar.
      */
     public void save(List<ResenaModel> resenas) {
         try (PrintWriter pw = new PrintWriter(new FileWriter(filePath))) {
             for (ResenaModel resena : resenas) {
-                pw.printf("%s%s%s%s%s%s%d%s%s%n",
+                // Se eliminó el parámetro del ID de usuario en la cadena de formato
+                pw.printf("%s%s%s%s%d%s%s%n",
                         resena.getIdResena(), SEPARADOR,
                         resena.getIsbnLibro(), SEPARADOR,
-                        resena.getIdUsuario(), SEPARADOR,
                         resena.getCalificacion(), SEPARADOR,
                         resena.getComentario());
             }

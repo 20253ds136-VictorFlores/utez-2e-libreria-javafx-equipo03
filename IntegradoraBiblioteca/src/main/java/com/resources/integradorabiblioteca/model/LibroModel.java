@@ -7,14 +7,65 @@ package com.resources.integradorabiblioteca.model;
  */
 public class LibroModel {
 
-    // El ISBN actúa como identificador único.
-    // Se recomienda mantenerlo privado y usar métodos de acceso.
+    // --- MÉTODOS DE ACCESO (GETTERS Y SETTERS) ---
     private String isbn;
+
+    public String getIsbn() {
+        return isbn;
+    }
+
+    public void setIsbn(String isbn) {
+        this.isbn = isbn;
+    }
+
     private String titulo;
+    public String getTitulo() {
+        return titulo;
+    }
+
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
+    }
+
     private String autor;
+    public String getAutor() {
+        return autor;
+    }
+
+    public void setAutor(String autor) {
+        this.autor = autor;
+    }
+
     private int anio;
+    public int getAnio() {
+        return anio;
+    }
+
+    public void setAnio(int anio) {
+        this.anio = anio;
+    }
+
     private String genero;
+    public String getGenero() {
+        return genero;
+    }
+
+    public void setGenero(String genero) {
+        this.genero = genero;
+    }
+
+    /**
+     * Verifica si el libro se encuentra disponible para préstamo.
+     * @return true si está disponible, false en caso contrario.
+     */
     private boolean disponible;
+    public boolean isDisponible() {
+        return disponible;
+    }
+
+    public void setDisponible(boolean disponible) {
+        this.disponible = disponible;
+    }
 
     /**
      * Constructor para inicializar una instancia completa de LibroModel.
@@ -31,64 +82,6 @@ public class LibroModel {
         this.autor = autor;
         this.anio = anio;
         this.genero = genero;
-        this.disponible = disponible;
-    }
-
-    // --- MÉTODOS DE ACCESO (GETTERS Y SETTERS) ---
-
-    public String getIsbn() {
-        return isbn;
-    }
-
-    /**
-     * Nota: Generalmente el ISBN no debería cambiar tras su creación.
-     * Se mantiene el setter por compatibilidad con algunos frameworks de persistencia.
-     */
-    public void setIsbn(String isbn) {
-        this.isbn = isbn;
-    }
-
-    public String getTitulo() {
-        return titulo;
-    }
-
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
-    }
-
-    public String getAutor() {
-        return autor;
-    }
-
-    public void setAutor(String autor) {
-        this.autor = autor;
-    }
-
-    public int getAnio() {
-        return anio;
-    }
-
-    public void setAnio(int anio) {
-        this.anio = anio;
-    }
-
-    public String getGenero() {
-        return genero;
-    }
-
-    public void setGenero(String genero) {
-        this.genero = genero;
-    }
-
-    /**
-     * Verifica si el libro se encuentra disponible para préstamo.
-     * @return true si está disponible, false en caso contrario.
-     */
-    public boolean isDisponible() {
-        return disponible;
-    }
-
-    public void setDisponible(boolean disponible) {
         this.disponible = disponible;
     }
 

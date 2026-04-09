@@ -12,24 +12,26 @@ import javafx.stage.Stage;
 
 /**
  * Controlador para la vista detallada de un libro.
- * Gestiona la visualización de metadatos del libro y la administración de reseñas
- * vinculadas al ISBN del ejemplar seleccionado.
+ * Optimizado para la gestión de reseñas anónimas y visualización de metadatos.
+ * Se ha eliminado la columna de usuario tanto de la UI como de la lógica.
  */
 public class DetailControllers {
 
     @FXML private Label lblIsbn, lblTitulo, lblAutor, lblAnio, lblGenero, lblDisponible;
+
     @FXML private TableView<ResenaModel> tablaResenas;
-    @FXML private TableColumn<ResenaModel, String> colUsuario, colComentario;
+
+    // Solo mantenemos las columnas de Calificación y Comentario
+    @FXML private TableColumn<ResenaModel, String> colComentario;
     @FXML private TableColumn<ResenaModel, Integer> colCalificacion;
+
     @FXML private TextField txtCalificacion, txtComentario;
 
     private LibroModel libroActual;
     private ResenaService resenaService;
 
     /**
-     * Carga la información del libro en la interfaz y vincula el servicio de reseñas.
-     * * @param libro El objeto {@link LibroModel} con los datos a mostrar.
-     * @param resenaService El servicio para obtener y guardar reseñas.
+     * Vincula el libro seleccionado y el servicio de reseñas a la vista.
      */
     public void cargarDatos(LibroModel libro, ResenaService resenaService) {
         this.libroActual = libro;
@@ -40,9 +42,6 @@ public class DetailControllers {
         actualizarListaResenas();
     }
 
-    /**
-     * Mapea los atributos del libro a las etiquetas de la interfaz de usuario.
-     */
     private void inicializarComponentesTexto(LibroModel libro) {
         lblIsbn.setText("ISBN: " + libro.getIsbn());
         lblTitulo.setText("Título: " + libro.getTitulo());
@@ -53,44 +52,47 @@ public class DetailControllers {
     }
 
     /**
-     * Define las fábricas de celdas para las columnas de la TableView.
+     * Configura cómo se extraen los datos de los objetos ResenaModel para la tabla.
+     * Ya no incluye la vinculación de colUsuario.
      */
     private void configurarEstructuraTabla() {
-        colUsuario.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getIdUsuario()));
-        colCalificacion.setCellValueFactory(cd -> new SimpleIntegerProperty(cd.getValue().getCalificacion()).asObject());
-        colComentario.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getComentario()));
+        // Vinculación de la columna calificación con el atributo entero del modelo
+        colCalificacion.setCellValueFactory(cd ->
+                new SimpleIntegerProperty(cd.getValue().getCalificacion()).asObject());
+
+        // Vinculación de la columna comentario con el atributo string del modelo
+        colComentario.setCellValueFactory(cd ->
+                new SimpleStringProperty(cd.getValue().getComentario()));
     }
 
     /**
-     * Procesa la creación de una nueva reseña.
-     * Incluye validación de rango (1-5 estrellas) y manejo de campos vacíos.
+     * Captura la entrada del usuario y genera una reseña sin vinculación a cuenta.
      */
     @FXML
     private void onAgregarResena() {
         try {
-            // Aplicamos trim() para ignorar espacios en blanco accidentales
             String califText = txtCalificacion.getText().trim();
             String comentarioText = txtComentario.getText().trim();
 
             if (califText.isEmpty() || comentarioText.isEmpty()) {
-                mostrarAlerta("Campos incompletos", "Debe ingresar una calificación y un comentario.");
+                mostrarAlerta("Campos incompletos", "Por favor, rellene todos los campos.");
                 return;
             }
 
             int estrellas = Integer.parseInt(califText);
 
             if (estrellas < 1 || estrellas > 5) {
-                mostrarAlerta("Calificación inválida", "Las estrellas deben ser un número entre 1 y 5.");
+                mostrarAlerta("Rango inválido", "La calificación debe ser de 1 a 5.");
                 return;
             }
 
-            // Generación de ID único basado en timestamp
+            // CREACIÓN DE OBJETO ANÓNIMO (Constructor de 4 Parámetros)
+            // Se eliminó definitivamente el parámetro de "Invitado" o "ID Usuario"
             ResenaModel nueva = new ResenaModel(
-                    "R-" + System.currentTimeMillis(),
-                    libroActual.getIsbn(),
-                    "Invitado",
-                    estrellas,
-                    comentarioText
+                    "R-" + System.currentTimeMillis(), // Generador de ID único temporal
+                    libroActual.getIsbn(),             // Llave foránea que une la reseña al libro
+                    estrellas,                         // Valor de la calificación
+                    comentarioText                     // Cuerpo de la opinión
             );
 
             resenaService.agregar(nueva);
@@ -98,15 +100,12 @@ public class DetailControllers {
             actualizarListaResenas();
 
         } catch (NumberFormatException e) {
-            mostrarAlerta("Error de formato", "La calificación debe ser un número entero (1-5).");
+            mostrarAlerta("Error de datos", "Ingrese un número válido para la calificación.");
         } catch (Exception e) {
-            mostrarAlerta("Error de sistema", "No se pudo guardar la reseña: " + e.getMessage());
+            mostrarAlerta("Error", "Error al procesar la reseña: " + e.getMessage());
         }
     }
 
-    /**
-     * Refresca los datos de la tabla filtrando por el ISBN del libro actual.
-     */
     private void actualizarListaResenas() {
         if (resenaService != null && libroActual != null) {
             var listaFiltrada = resenaService.listarPorLibro(libroActual.getIsbn());
@@ -114,26 +113,17 @@ public class DetailControllers {
         }
     }
 
-    /**
-     * Limpia los campos de texto después de agregar una reseña exitosamente.
-     */
     private void limpiarEntradas() {
         txtCalificacion.clear();
         txtComentario.clear();
     }
 
-    /**
-     * Cierra la ventana de detalles y regresa a la vista principal.
-     */
     @FXML
     private void onRegresar() {
         Stage stage = (Stage) lblIsbn.getScene().getWindow();
         stage.close();
     }
 
-    /**
-     * Muestra una ventana de diálogo informativa al usuario.
-     */
     private void mostrarAlerta(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(titulo);

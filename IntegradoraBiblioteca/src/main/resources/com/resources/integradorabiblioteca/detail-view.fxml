@@ -47,7 +47,6 @@
 
     <TableView fx:id="tablaResenas" VBox.vgrow="ALWAYS">
         <columns>
-            <TableColumn fx:id="colUsuario" text="Usuario" prefWidth="100"/>
             <TableColumn fx:id="colCalificacion" text="Estrellas" prefWidth="80"/>
             <TableColumn fx:id="colComentario" text="Comentario" prefWidth="300"/>
         </columns>
