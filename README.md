@@ -77,6 +77,7 @@ IntegradoraBiblioteca/
 │   └── RunApplication.java       # Clase principal de JavaFX
 ├── src/main/resources/           # Vistas (Archivos .fxml)
 └── module-info.java              # Configuración de módulos
+```
 ## 8. Persistencia y Reportes
 Sincronización: Cada cambio se guarda inmediatamente en los archivos .csv ubicados en la carpeta data/.
 
